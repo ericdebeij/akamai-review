@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -42,7 +42,7 @@ func (ds *DiagnosticsService) ReadCache() {
 	jsonFile, err := os.Open(ds.CacheDir + "/diagiscdn.json")
 	if err == nil {
 		defer jsonFile.Close()
-		byteValue, _ := ioutil.ReadAll(jsonFile)
+		byteValue, _ := io.ReadAll(jsonFile)
 		json.Unmarshal(byteValue, &ds.IpCache)
 		log.Debug(fmt.Sprint("IP Cache loaded:", len(ds.IpCache)))
 	} else {
@@ -145,7 +145,7 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 			return
 		}
 		if ds.Response.StatusCode != 429 {
-			data, e := ioutil.ReadAll(ds.Response.Body)
+			data, e := io.ReadAll(ds.Response.Body)
 			if e != nil {
 				fmt.Println(e)
 			}
