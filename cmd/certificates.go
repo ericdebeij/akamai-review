@@ -42,14 +42,15 @@ func init() {
 
 func certificates() {
 	certreport := report.CertReport{
-		EdgeSession:   akamaiSession,
-		DnsService:    akutil.NewDnsService(viper.GetString("resolver")),
-		DiagService:   aksv.NewDiagnosticsService(akamaiSession, viper.GetString("akamai.cache")),
-		Export:        viper.GetString("export"),
-		UseCoverage:   viper.GetBool("input.appsec"),
-		UseHostnames:  viper.GetStringSlice("input.hostnames"),
-		SkipHostnames: viper.GetStringSlice("input.skiphosts"),
-		WarningDays:   viper.GetInt("warning.days"),
+		EdgeSession:    akamaiSession,
+		DnsService:     akutil.NewDnsService(viper.GetString("resolver")),
+		DiagService:    aksv.NewDiagnosticsService(akamaiSession, viper.GetString("akamai.cache")),
+		Export:         viper.GetString("export"),
+		UseCoverage:    viper.GetBool("input.appsec"),
+		UseHostnames:   viper.GetStringSlice("input.hostnames"),
+		SkipHostnames:  viper.GetStringSlice("input.skiphosts"),
+		MatchHostnames: viper.GetStringSlice("input.matchhosts"),
+		WarningDays:    viper.GetInt("warning.days"),
 	}
 	certreport.Report()
 }

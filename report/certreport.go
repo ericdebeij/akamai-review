@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/appsec"
@@ -24,13 +25,14 @@ type testclass struct {
 }
 
 type hostinfo struct {
-	hostname string
-	status   string
-	err      string
-	cdn      string
-	subject  string
-	issuer   string
-	expire   time.Time
+	hostname  string
+	status    string
+	err       string
+	cdn       string
+	subject   string
+	issuer    string
+	expire    time.Time
+	iscovered string
 }
 
 func (t *testclass) testhost(hostname string) (info *hostinfo) {
@@ -68,14 +70,15 @@ func (t *testclass) testhost(hostname string) (info *hostinfo) {
 }
 
 type CertReport struct {
-	EdgeSession   session.Session
-	DnsService    *akutil.Dns
-	DiagService   *aksv.DiagnosticsService
-	Export        string
-	UseCoverage   bool
-	UseHostnames  []string
-	SkipHostnames []string
-	WarningDays   int
+	EdgeSession    session.Session
+	DnsService     *akutil.Dns
+	DiagService    *aksv.DiagnosticsService
+	Export         string
+	UseCoverage    bool
+	UseHostnames   []string
+	SkipHostnames  []string
+	MatchHostnames []string
+	WarningDays    int
 }
 
 func (certreport CertReport) Report() {
@@ -96,9 +99,6 @@ func (certreport CertReport) Report() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
-	r := []string{"hostname", "cdn", "subject", "issuer", "expire", "error"}
-	w.Write(r)
-
 	secClient := appsec.Client(tst.edgeSession)
 
 	if certreport.UseCoverage {
@@ -110,21 +110,28 @@ func (certreport CertReport) Report() {
 			os.Exit(1)
 		}
 		for _, ch := range x.HostnameCoverage {
-			tst.hosts[ch.Hostname] = &hostinfo{
-				hostname: ch.Hostname,
+			hn := strings.ToLower(ch.Hostname)
+
+			tst.hosts[hn] = &hostinfo{
+				hostname:  hn,
+				iscovered: ch.Status,
 			}
 		}
 	}
 
 	for _, hn := range certreport.UseHostnames {
-		tst.hosts[hn] = &hostinfo{
-			hostname: hn,
+		hn = strings.ToLower(hn)
+		_, found := tst.hosts[hn]
+		if !found {
+			tst.hosts[hn] = &hostinfo{
+				hostname:  hn,
+				iscovered: "unknown",
+			}
 		}
 	}
 
-	skiphosts := certreport.SkipHostnames
 	skipre := make([]*regexp.Regexp, 0, 10)
-	for _, hn := range skiphosts {
+	for _, hn := range certreport.SkipHostnames {
 		if hn[0] == '^' {
 			re, err := regexp.Compile(hn)
 			if err != nil {
@@ -139,9 +146,24 @@ func (certreport CertReport) Report() {
 			tst.hosts[hn].status = "skip"
 		}
 	}
-
+	matchre := make([]*regexp.Regexp, 0, 10)
+	matchexact := make([]string, 0, 10)
+	for _, hn := range certreport.MatchHostnames {
+		if hn[0] == '^' {
+			re, err := regexp.Compile(hn)
+			if err != nil {
+				log.Print(err)
+			} else {
+				matchre = append(matchre, re)
+			}
+		} else {
+			matchexact = append(matchexact, hn)
+		}
+	}
 	n := time.Now()
 	fmt.Printf("Checking %d hosts\n", len(tst.hosts))
+	r := []string{"hostname", "cdn", "subject", "issuer", "expire", "error", "covered"}
+	w.Write(r)
 	for hn, hi := range tst.hosts {
 		for _, re := range skipre {
 			if re.MatchString(hn) {
@@ -149,11 +171,31 @@ func (certreport CertReport) Report() {
 			}
 		}
 
+		found := false
+		for _, re := range matchre {
+			if re.MatchString(hn) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			for _, hx := range matchexact {
+				if hx == hn {
+					found = true
+					break
+				}
+			}
+		}
+		if !found && len(certreport.MatchHostnames) > 0 {
+			hi.status = "skip"
+		}
+
 		if hi.status == "skip" {
 			continue
 		}
+
 		i := tst.testhost(hn)
-		w.Write([]string{i.hostname, i.cdn, i.subject, i.issuer, i.expire.String(), i.err})
+		w.Write([]string{i.hostname, i.cdn, i.subject, i.issuer, i.expire.String(), i.err, i.iscovered})
 		if i.err == "" && i.cdn == "akamai" && n.After(i.expire.AddDate(0, 0, 0-certreport.WarningDays)) {
 			fmt.Println("Host       :", i.hostname)
 			fmt.Println("Expire date:", i.expire)
