@@ -38,7 +38,11 @@ type hostinfo struct {
 func (t *testclass) testhost(hostname string) (info *hostinfo) {
 	info = t.hosts[hostname]
 
-	ips, _ := t.dnsService.DnsInfo(hostname)
+	ips, _, err := t.dnsService.DnsInfo(hostname)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	if len(ips) == 0 {
 		info.cdn = "no-ip"
 		return

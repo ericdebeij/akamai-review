@@ -1,8 +1,6 @@
 package akutil
 
 import (
-	"fmt"
-
 	"github.com/miekg/dns"
 )
 
@@ -18,16 +16,16 @@ func NewDnsService(resolver string) (d *Dns) {
 	d.Client = new(dns.Client)
 	return
 }
-func (d *Dns) DnsInfo(hostname string) (ips, cnames []string) {
+func (d *Dns) DnsInfo(hostname string) (ips, cnames []string, err error) {
 
 	m := &dns.Msg{
 		Question: make([]dns.Question, 1),
 	}
 	m.SetQuestion(dns.Fqdn(hostname), dns.TypeA)
 
-	in, _, err := d.Client.Exchange(m, d.Resolver)
-	if err != nil {
-		fmt.Println(err)
+	in, _, err2 := d.Client.Exchange(m, d.Resolver)
+	if err2 != nil {
+		err = err2
 		return
 	}
 	ips = make([]string, 0, 2)
