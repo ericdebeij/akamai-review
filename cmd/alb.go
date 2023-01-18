@@ -21,7 +21,10 @@ var albCmd = &cobra.Command{
 	},
 }
 
+var albExportDC string
+
 func init() {
+	albCmd.Flags().StringVar(&albExportDC, "exportdc", "", "export datacenters used in alb definitions")
 	rootCmd.AddCommand(albCmd)
 
 	// Here you will define your flags and configuration settings.
@@ -36,11 +39,14 @@ func init() {
 }
 
 func alb() {
+	if albExportDC == "" {
+		albExportDC = viper.GetString("alb.exportdc")
+	}
 	albreport := report.AlbReport{
 		EdgeSession: akamaiSession,
 		AlbService:  aksv.NewAlbService(akamaiSession),
 		DnsService:  akutil.NewDnsService(viper.GetString("resolver")),
-		ExportDC:    viper.GetString("alb.exportdc"),
+		ExportDC:    albExportDC,
 	}
 	albreport.Report()
 }

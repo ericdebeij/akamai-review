@@ -26,8 +26,7 @@ var certificatesCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(certificatesCmd)
-	viper.SetDefault("resolver", "8.8.8.8:53")
-	viper.SetDefault("export", "export.csv")
+
 	viper.SetDefault("warning.days", 14)
 	// Here you will define your flags and configuration settings.
 

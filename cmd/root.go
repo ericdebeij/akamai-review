@@ -44,6 +44,8 @@ func init() {
 
 	akamaiConfig = &aksv.EdgeConfig{}
 
+	viper.SetDefault("resolver", "8.8.8.8:53")
+	viper.SetDefault("export", "export.csv")
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")
 	rootCmd.PersistentFlags().StringVar(&akamaiConfig.Edgerc, "edgerc", "", "location of the credentials file")
 	rootCmd.PersistentFlags().StringVar(&akamaiConfig.Section, "section", "", "section of the credentials file")
@@ -66,6 +68,7 @@ func initConfig() {
 	} else if !errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
 		fmt.Fprintln(os.Stderr, "error reading config file:", viper.ConfigFileUsed(), err)
 	}
+
 	openSession()
 }
 func openSession() {
