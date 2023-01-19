@@ -42,7 +42,6 @@ func (ar AlbReport) Report() {
 		vs := []int{}
 		for _, a := range pol.Activations {
 			if akutil.FindInt(vs, a.PolicyInfo.Version) >= 0 {
-				fmt.Println("analyzing ...")
 				pv, err := ar.AlbService.PolicyVersion(a.PolicyInfo.PolicyID, a.PolicyInfo.Version)
 				if err != nil {
 					log.Fatalln("failed to retrieve policyversion for ALB", err)
