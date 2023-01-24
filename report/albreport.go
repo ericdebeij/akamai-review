@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/session"
 	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
 	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
 )
