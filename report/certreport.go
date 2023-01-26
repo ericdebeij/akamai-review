@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"log"
+
 	"os"
 	"regexp"
 	"strings"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/appsec"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/session"
+	"github.com/apex/log"
 	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
 	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
 	"github.com/hako/durafmt"
@@ -40,7 +41,7 @@ func (t *testclass) testhost(hostname string) (info *hostinfo) {
 
 	ips, _, err := t.dnsService.DnsInfo(hostname)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("dns error %w", err)
 	}
 
 	if len(ips) == 0 {
@@ -96,7 +97,7 @@ func (certreport CertReport) Report() {
 
 	f, err := os.Create(certreport.Export)
 	if err != nil {
-		log.Fatalln("failed to open file", err)
+		log.Fatalf("failed to open file %w", err)
 	}
 	defer f.Close()
 
@@ -110,7 +111,7 @@ func (certreport CertReport) Report() {
 		x, err := secClient.GetApiHostnameCoverage(context.Background(), coverageRequest)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Fatalf("api hostnamecoverage %w", err)
 			os.Exit(1)
 		}
 		for _, ch := range x.HostnameCoverage {
@@ -139,7 +140,7 @@ func (certreport CertReport) Report() {
 		if hn[0] == '^' {
 			re, err := regexp.Compile(hn)
 			if err != nil {
-				log.Print(err)
+				log.Errorf("compile regex %w", err)
 			} else {
 				skipre = append(skipre, re)
 			}
@@ -156,7 +157,7 @@ func (certreport CertReport) Report() {
 		if hn[0] == '^' {
 			re, err := regexp.Compile(hn)
 			if err != nil {
-				log.Print(err)
+				log.Fatalf("regex compile %w", err)
 			} else {
 				matchre = append(matchre, re)
 			}
@@ -165,7 +166,7 @@ func (certreport CertReport) Report() {
 		}
 	}
 	n := time.Now()
-	fmt.Printf("Checking %d hosts\n", len(tst.hosts))
+	fmt.Printf("Checking %d hosts", len(tst.hosts))
 	r := []string{"hostname", "cdn", "subject", "issuer", "expire", "error", "covered"}
 	w.Write(r)
 	for hn, hi := range tst.hosts {

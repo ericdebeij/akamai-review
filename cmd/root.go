@@ -5,10 +5,10 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -64,9 +64,10 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "using config file:", viper.ConfigFileUsed())
+		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	} else if !errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
-		fmt.Fprintln(os.Stderr, "error reading config file:", viper.ConfigFileUsed(), err)
+
+		log.Infof("error reading config file: %s error %w", viper.ConfigFileUsed(), err)
 	}
 
 	openSession()
@@ -86,7 +87,7 @@ func openSession() {
 
 	sess, err := aksv.NewSession(akamaiConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("akamai-session %w", err)
 		os.Exit(1)
 	}
 	akamaiSession = sess

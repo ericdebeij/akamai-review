@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
+	"github.com/apex/log"
 	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
 )
 
@@ -54,7 +55,7 @@ func (ps *Propsv) GetRuleTree(params papi.GetRuleTreeRequest) (tree *papi.GetRul
 		tree, err = ps.PapiClient.GetRuleTree(context.Background(), params)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Error(fmt.Sprint(err))
 			return
 		}
 
@@ -110,7 +111,7 @@ func LoadFile(filename string) (b *[]byte) {
 		defer jsonFile.Close()
 		byteValue, err := io.ReadAll(jsonFile)
 		if err != nil {
-			fmt.Println(err)
+			log.Errorf("load error %w", err)
 		}
 		b = &byteValue
 		return
@@ -123,11 +124,11 @@ func SaveFile(filename string, x interface{}) {
 
 	byteblob, err2 := json.Marshal(x)
 	if err2 != nil {
-		fmt.Println(err2)
+		log.Errorf("marshall error %w", err2)
 	}
 	err2 = os.WriteFile(filename, byteblob, 0644)
 	if err2 != nil {
-		fmt.Println(err2)
+		log.Errorf("write error - %w", err2)
 	}
 }
 
@@ -138,7 +139,6 @@ func (p *Propsv) GetPropertyVersionHostnames(ctx context.Context, params papi.Ge
 	// if we os.Open returns an error then handle it
 	if err == nil {
 		defer jsonFile.Close()
-		fmt.Println("found", filename)
 
 		pr := &papi.GetPropertyVersionHostnamesResponse{}
 		byteValue, _ := io.ReadAll(jsonFile)
@@ -146,9 +146,7 @@ func (p *Propsv) GetPropertyVersionHostnames(ctx context.Context, params papi.Ge
 		return pr, nil
 
 	} else {
-		fmt.Println("need to lookup", filename)
 		if !os.IsNotExist(err) {
-			fmt.Println(err)
 			return nil, err
 		}
 
@@ -161,21 +159,20 @@ func (p *Propsv) GetPropertyVersionHostnames(ctx context.Context, params papi.Ge
 		}
 
 		gpr, found := p.propertiesCache[gpp]
-		fmt.Println("lookup", gpp, found)
+
 		if found {
-			fmt.Println("found", gpp)
 			for _, prop := range gpr.Properties.Items {
 				if params.PropertyID == prop.PropertyID {
 
 					if params.PropertyVersion == *prop.ProductionVersion || params.PropertyVersion == *prop.StagingVersion {
 						byteblob, err2 := json.Marshal(pr)
 						if err2 != nil {
-							fmt.Println(err2)
+							log.Errorf("marshall ", err2)
 						}
 						os.MkdirAll(filepath.Dir(filename), 0750)
 						err2 = os.WriteFile(filename, byteblob, 0644)
 						if err2 != nil {
-							fmt.Println(err2)
+							log.Errorf("write %w", err2)
 						}
 						break
 					}

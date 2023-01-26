@@ -7,6 +7,7 @@
 *.yaml
 *.csv
 *.txt
+*.xlsx
 
 # Test binary, built with `go test -c`
 *.test

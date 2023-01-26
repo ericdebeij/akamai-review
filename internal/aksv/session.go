@@ -3,6 +3,7 @@ package aksv
 import (
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgegrid"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/apex/log"
 )
 
 type EdgeConfig struct {
@@ -27,6 +28,7 @@ func NewSession(param *EdgeConfig) (s session.Session, err error) {
 	s, err = session.New(
 		session.WithSigner(edgerc),
 		session.WithHTTPTracing(true),
+		session.WithLog(log.Log),
 	)
 	return
 }
