@@ -19,11 +19,16 @@ type PropReport struct {
 	DnsService  *akutil.Dns
 	DiagService *aksv.DiagnosticsService
 	PropService *aksv.Propsv
+	ReportName  string
 	Export      string
 	Group       string
 }
 
 func (pr PropReport) Report() {
+
+	if pr.ReportName != "origin" {
+		log.Fatalf("not (yet) supported report")
+	}
 
 	log.Infof("property report %v", pr.Export)
 
@@ -42,7 +47,7 @@ func (pr PropReport) Report() {
 		return
 	}
 
-	r := []string{"group", "property", "origin-type", "hostname", "hostheader", "hostmatch", "pathmatch"}
+	r := []string{"group", "property", "origintype", "origin", "forward", "hostmatch", "pathmatch", "siteshield"}
 	w.Write(r)
 	for _, grp := range groupResponse.Groups.Items {
 		for _, contractId := range grp.ContractIDs {
@@ -72,6 +77,15 @@ func (pr PropReport) Report() {
 						pt := pr.PropService.GetRuleTree(prtrq)
 
 						pb := pr.PropService.FindBehaviors(&pt.Rules)
+
+						siteshields, f := pb.Behaviors["siteShield"]
+						siteshield := ""
+						if f {
+							for _, ss := range siteshields {
+								siteshield += " " + ss.Behavior.Options["ssmap"].(map[string]interface{})["value"].(string)
+							}
+						}
+
 						origins, f := pb.Behaviors["origin"]
 						if f {
 							for _, o := range origins {
@@ -80,9 +94,9 @@ func (pr PropReport) Report() {
 								ohostheader := ""
 								if otype == "NET_STORAGE" {
 									n := o.Behavior.Options["netStorage"].(map[string]interface{})["cpCode"].(float64)
-									ohostheader = fmt.Sprintf("%v", n)
+									ohostheader = fmt.Sprintf("cpcode:%v", n)
 									otype = "ns"
-									ohostname = fmt.Sprint(o.Behavior.Options["netStorage"].(map[string]interface{})["downloadDomainName"])
+									ohostname = fmt.Sprintf("%v", o.Behavior.Options["netStorage"].(map[string]interface{})["downloadDomainName"])
 								} else {
 									if otype == "CUSTOMER" {
 										ohostname = fmt.Sprint(o.Behavior.Options["hostname"])
@@ -118,6 +132,7 @@ func (pr PropReport) Report() {
 									ohostheader,
 									hostmatch,
 									pathmatch,
+									siteshield,
 								})
 							}
 						}

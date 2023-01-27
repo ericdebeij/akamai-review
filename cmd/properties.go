@@ -4,6 +4,9 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
 	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
@@ -27,6 +30,8 @@ to quickly create a Cobra application.`,
 	},
 }
 
+var preportname string
+
 func init() {
 	rootCmd.AddCommand(propertiesCmd)
 
@@ -39,9 +44,14 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// propertiesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	propertiesCmd.Flags().StringVar(&preportname, "report", "", "name of the report, options: origin")
 }
 
 func properties() {
+	if preportname == "" {
+		fmt.Fprint(os.Stderr, "report name mandatory\n")
+		os.Exit(1)
+	}
 	papiClient := papi.Client(akamaiSession)
 	propreport := report.PropReport{
 		EdgeSession: akamaiSession,
@@ -50,6 +60,7 @@ func properties() {
 		PropService: aksv.NewPropertyService(papiClient, viper.GetString("akamai.cache")),
 		Export:      viper.GetString("export"),
 		Group:       viper.GetString("report.group"),
+		ReportName:  preportname,
 	}
 	propreport.Report()
 }
