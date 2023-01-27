@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2022, 2023 NAME HERE hdebeij@akamai.com
 */
 package main
 
