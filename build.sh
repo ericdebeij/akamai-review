@@ -10,6 +10,9 @@ mkdir -p build
 rm build/*
 
 cd ${MAIN}
+GOOS=darwin GOARCH=arm64 go build -o ${BUILD}/${CMD}-${VERSION}-macarm64 .
+shasum -a 256 ${BUILD}/${CMD}-${VERSION}-macarm64 | awk '{print $1'} > ${BUILD}/${CMD}-${VERSION}-macarm64.sig
+
 GOOS=darwin GOARCH=amd64 go build -o ${BUILD}/${CMD}-${VERSION}-macamd64 .
 shasum -a 256 ${BUILD}/${CMD}-${VERSION}-macamd64 | awk '{print $1'} > ${BUILD}/${CMD}-${VERSION}-macamd64.sig
 
