@@ -49,7 +49,6 @@ func properties() {
 		DiagService: aksv.NewDiagnosticsService(akamaiSession, viper.GetString("akamai.cache")),
 		PropService: aksv.NewPropertyService(papiClient, viper.GetString("akamai.cache")),
 		Export:      viper.GetString("export"),
-		ContractID:  viper.GetString("report.contractId"),
 		Group:       viper.GetString("report.group"),
 	}
 	propreport.Report()
