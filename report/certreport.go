@@ -166,7 +166,7 @@ func (certreport CertReport) Report() {
 		}
 	}
 	n := time.Now()
-	fmt.Printf("Checking %d hosts", len(tst.hosts))
+	fmt.Printf("Checking %d hosts\n", len(tst.hosts))
 	r := []string{"hostname", "cdn", "subject", "issuer", "expire", "error", "covered"}
 	w.Write(r)
 	for hn, hi := range tst.hosts {
