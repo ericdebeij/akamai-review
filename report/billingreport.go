@@ -3,6 +3,7 @@ package report
 import (
 	"encoding/csv"
 	"fmt"
+	"strings"
 
 	"os"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 	"github.com/ericdebeij/akamai-review/v2/internal/yearmonth"
 )
 
-type UsageReport struct {
+type UsageCpcode struct {
 	EdgeSession    session.Session
 	BillingService *aksv.BillingService
 	CpCodeService  *aksv.CpcodeService
@@ -31,8 +32,7 @@ type r struct {
 	currentHits  float64
 }
 
-func (ur UsageReport) Report() {
-	log.Infof("property report %v", ur.Export)
+func (ur UsageCpcode) Report() {
 
 	tm := yearmonth.Add(ur.Period, 1)
 	fm := yearmonth.Add(tm, -2)
@@ -76,6 +76,12 @@ func (ur UsageReport) Report() {
 		return
 	}
 
+	rginfos, err := ur.CpCodeService.GetRepgroups("")
+	if err != nil {
+		log.Fatalf("reportinggroup error: %w", err)
+		return
+	}
+
 	f, err := os.Create(ur.Export)
 	if err != nil {
 		log.Fatalf("failed to open file: %w", err)
@@ -91,14 +97,19 @@ func (ur UsageReport) Report() {
 
 	for cpcode, vs := range sum {
 		cpinfo := cpinfos.FindCpcode(cpcode)
+		rginfo := rginfos.FindByCpcode(cpcode)
+		rgroup := make([]string, 0, 3)
+		for _, rg := range rginfo.Groups {
+			rgroup = append(rgroup, rg.ReportingGroupName)
+		}
 		w.Write([]string{strconv.Itoa(cpcode), cpinfo.CpcodeName,
-			"",
+			strings.Join(rgroup, ","),
 			fmt.Sprintf("%f", vs.currentBytes),
 			fmt.Sprintf("%f", vs.prevBytes),
 			fmt.Sprintf("%f", vs.currentBytes-vs.prevBytes),
 			fmt.Sprintf("%f", vs.currentHits),
 			fmt.Sprintf("%f", vs.prevHits),
-			fmt.Sprintf("%f", vs.currentBytes-vs.prevBytes),
+			fmt.Sprintf("%f", vs.currentHits-vs.prevHits),
 		})
 	}
 }

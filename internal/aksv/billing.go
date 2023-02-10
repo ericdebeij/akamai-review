@@ -164,7 +164,7 @@ func (bs *BillingService) GetUsageCpcode(contractId, productId, startMonth, endM
 		log.Fatalf("response error: %w", err)
 		return
 	}
-	fmt.Println(bs.Response.Status)
+
 	return
 }
 

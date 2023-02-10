@@ -54,7 +54,7 @@ type Cpcode struct {
 	AccessGroup      AccessGroupshort `json:"accessGroup"`
 }
 
-type RepgroupRequest struct {
+type Repgroups struct {
 	Groups []Repgroup `json:"groups"`
 }
 type Cpcodeshort struct {
@@ -101,14 +101,34 @@ func (cs *CpcodeService) GetCpcodes() (cpcodes *CpcodesRequest, err error) {
 	return
 }
 
-func (cs *CpcodeService) GetRepgroup(filter string) (repGroups *RepgroupRequest, err error) {
+func (cs *CpcodeService) GetRepgroups(filter string) (repGroups *Repgroups, err error) {
 	url := "/cprg/v1/reporting-groups"
 	if filter != "" {
 		url += "?" + filter
 	}
-	repGroups = &RepgroupRequest{}
+	repGroups = &Repgroups{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	cs.Response, err = cs.Session.Exec(req, &repGroups)
 
+	return
+}
+
+func (rg *Repgroups) FindByCpcode(cpcode int) (sg *Repgroups) {
+	sg = &Repgroups{}
+	for _, g := range rg.Groups {
+		found := false
+		for _, c := range g.Contracts {
+			for _, cp := range c.Cpcodes {
+				if cp.CpcodeID == cpcode {
+					sg.Groups = append(sg.Groups, g)
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
 	return
 }

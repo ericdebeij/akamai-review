@@ -131,8 +131,6 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 			return
 		}
 
-		//fmt.Println(ds.Response.StatusCode)
-
 		if ds.Response.StatusCode == 200 {
 			for _, rip := range rsb.Results {
 				ds.IpCache[rip.IPAddress] = rip.IsEdgeIP
