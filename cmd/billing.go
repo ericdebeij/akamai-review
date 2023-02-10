@@ -18,7 +18,7 @@ import (
 // reportCmd represents the usage command
 var reportCmd = &cobra.Command{
 	Use:   "billing",
-	Short: "Billing-usage report traffic / cpcode",
+	Short: "Reports based on billing data",
 	Long: `This report extracts traffic information for the requested period (default the previous period)
 	and compares this with the period before`,
 	Run: func(cmd *cobra.Command, args []string) {
