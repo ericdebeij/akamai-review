@@ -19,15 +19,38 @@ type PropReport struct {
 	DnsService  *akutil.Dns
 	DiagService *aksv.DiagnosticsService
 	PropService *aksv.Propsv
-	ReportName  string
+	ReportType  string
 	Export      string
 	Group       string
+	LoadRules   bool
+	LoadHosts   bool
+}
+
+type PropertyInfo struct {
+	Groupname    string
+	Propertyname string
+	Siteshield   string
+	Hosts        []*Hostinfo
+	Origins      []*OriginInfo
+}
+
+type Hostinfo struct {
+	Hostname string
+}
+
+type OriginInfo struct {
+	Origin     string
+	Hostheader string
+	Type       string
+	Hostmatch  string
+	Pathmatch  string
+	Ips        []string
 }
 
 func (pr PropReport) Report() {
 
-	if pr.ReportName != "origin" {
-		log.Fatalf("not (yet) supported report")
+	if pr.ReportType != "origin" && pr.ReportType != "host" {
+		log.Fatalf("not (yet) supported report", pr.ReportType)
 	}
 
 	log.Infof("property report %v", pr.Export)
@@ -41,14 +64,39 @@ func (pr PropReport) Report() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
+	r := []string{"group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips"}
+	w.Write(r)
+
+	if pr.ReportType == "origin" {
+		pr.LoadRules = true
+		properties := pr.Build()
+		for _, p := range properties {
+			for _, o := range p.Origins {
+				w.Write([]string{
+					p.Groupname,
+					p.Propertyname,
+					//strings.Join(hostnames, " "),
+					o.Origin,
+					o.Type,
+					o.Hostheader,
+					o.Hostmatch,
+					o.Pathmatch,
+					p.Siteshield,
+					strings.Join(o.Ips, " "),
+				})
+			}
+		}
+	}
+}
+
+func (pr PropReport) Build() (properties []*PropertyInfo) {
+	properties = make([]*PropertyInfo, 0, 1000)
 	groupResponse, err := pr.PropService.PapiClient.GetGroups(context.Background())
 	if err != nil {
 		log.Fatalf("get groups %w", err)
 		return
 	}
 
-	r := []string{"group", "property", "origintype", "origin", "forward", "hostmatch", "pathmatch", "siteshield"}
-	w.Write(r)
 	for _, grp := range groupResponse.Groups.Items {
 		for _, contractId := range grp.ContractIDs {
 			plrq := papi.GetPropertiesRequest{
@@ -66,7 +114,25 @@ func (pr PropReport) Report() {
 				for _, x := range pl.Properties.Items {
 					pv := 0
 					if x.ProductionVersion != nil {
+
 						pv = *x.ProductionVersion
+
+						prhrq := papi.GetPropertyVersionHostnamesRequest{
+							PropertyID:        x.PropertyID,
+							PropertyVersion:   pv,
+							ContractID:        x.ContractID,
+							GroupID:           x.GroupID,
+							ValidateHostnames: false,
+							IncludeCertStatus: true,
+						}
+						hl, _ := pr.PropService.GetPropertyVersionHostnames(prhrq)
+
+						hll := len(hl.Hostnames.Items)
+						hostnames := make([]string, hll, hll)
+						for hii, hiv := range hl.Hostnames.Items {
+							hostnames[hii] = hiv.CnameFrom
+						}
+
 						prtrq := papi.GetRuleTreeRequest{
 							PropertyID:      x.PropertyID,
 							PropertyVersion: pv,
@@ -86,9 +152,12 @@ func (pr PropReport) Report() {
 							}
 						}
 
-						origins, f := pb.Behaviors["origin"]
+						pmorigins, f := pb.Behaviors["origin"]
+						var origins []*OriginInfo
 						if f {
-							for _, o := range origins {
+							origins = make([]*OriginInfo, len(pmorigins))
+							for oi, o := range pmorigins {
+
 								otype := o.Behavior.Options["originType"].(string)
 								ohostname := ""
 								ohostheader := ""
@@ -125,20 +194,36 @@ func (pr PropReport) Report() {
 									}
 								}
 								pathmatch = strings.Trim(pathmatch, " ")
-								w.Write([]string{grp.GroupName,
-									x.PropertyName,
-									otype,
-									ohostname,
-									ohostheader,
-									hostmatch,
-									pathmatch,
-									siteshield,
-								})
+
+								ips, _, err := pr.DnsService.DnsInfo(ohostname)
+								if err != nil {
+									log.Infof("dns %s: %w")
+								}
+
+								origin := &OriginInfo{
+									Origin:     ohostname,
+									Hostheader: ohostheader,
+									Type:       otype,
+									Hostmatch:  hostmatch,
+									Pathmatch:  pathmatch,
+									Ips:        ips,
+								}
+								origins[oi] = origin
+
 							}
 						}
+						propinfo := &PropertyInfo{
+							Groupname:    grp.GroupName,
+							Propertyname: x.PropertyName,
+							Siteshield:   siteshield,
+							Origins:      origins,
+						}
+						properties = append(properties, propinfo)
 					}
 				}
 			}
 		}
 	}
+
+	return
 }

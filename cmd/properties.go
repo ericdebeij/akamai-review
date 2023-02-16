@@ -60,7 +60,7 @@ func properties() {
 		PropService: aksv.NewPropertyService(papiClient, viper.GetString("akamai.cache")),
 		Export:      viper.GetString("export"),
 		Group:       viper.GetString("report.group"),
-		ReportName:  preportname,
+		ReportType:  preportname,
 	}
 	propreport.Report()
 }

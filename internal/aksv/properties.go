@@ -132,53 +132,23 @@ func SaveFile(filename string, x interface{}) {
 	}
 }
 
-func (p *Propsv) GetPropertyVersionHostnames(ctx context.Context, params papi.GetPropertyVersionHostnamesRequest) (*papi.GetPropertyVersionHostnamesResponse, error) {
-	filename := fmt.Sprintf("%s/prophosts/%s_%d.json", p.CacheDir, params.PropertyID, params.PropertyVersion)
-	// Open our jsonFile
-	jsonFile, err := os.Open(filename)
-	// if we os.Open returns an error then handle it
-	if err == nil {
-		defer jsonFile.Close()
+func (ps *Propsv) GetPropertyVersionHostnames(params papi.GetPropertyVersionHostnamesRequest) (pr *papi.GetPropertyVersionHostnamesResponse, err error) {
 
-		pr := &papi.GetPropertyVersionHostnamesResponse{}
-		byteValue, _ := io.ReadAll(jsonFile)
-		json.Unmarshal(byteValue, pr)
-		return pr, nil
+	filename := fmt.Sprintf("%s/%s/property/%s_%d_host.json", ps.CacheDir, params.ContractID, params.PropertyID, params.PropertyVersion)
 
+	if b := LoadFile(filename); b != nil {
+		pr = &papi.GetPropertyVersionHostnamesResponse{}
+
+		json.Unmarshal(*b, pr)
 	} else {
-		if !os.IsNotExist(err) {
-			return nil, err
+		pr, err = ps.PapiClient.GetPropertyVersionHostnames(context.Background(), params)
+
+		if err != nil {
+			log.Error(fmt.Sprint(err))
+			return
 		}
 
-		pr, err := p.PapiClient.GetPropertyVersionHostnames(ctx, params)
-
-		// Now we have this, lets check if this is a locked configuration, in which case we can store it in cache.
-		gpp := papi.GetPropertiesRequest{
-			ContractID: params.ContractID,
-			GroupID:    params.GroupID,
-		}
-
-		gpr, found := p.propertiesCache[gpp]
-
-		if found {
-			for _, prop := range gpr.Properties.Items {
-				if params.PropertyID == prop.PropertyID {
-
-					if params.PropertyVersion == *prop.ProductionVersion || params.PropertyVersion == *prop.StagingVersion {
-						byteblob, err2 := json.Marshal(pr)
-						if err2 != nil {
-							log.Errorf("marshall ", err2)
-						}
-						os.MkdirAll(filepath.Dir(filename), 0750)
-						err2 = os.WriteFile(filename, byteblob, 0644)
-						if err2 != nil {
-							log.Errorf("write %w", err2)
-						}
-						break
-					}
-				}
-			}
-		}
-		return pr, err
+		SaveFile(filename, *pr)
 	}
+	return
 }
