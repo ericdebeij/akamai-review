@@ -64,12 +64,13 @@ func (pr PropReport) Report() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
-	r := []string{"group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips"}
-	w.Write(r)
-
 	if pr.ReportType == "origin" {
 		pr.LoadRules = true
 		properties := pr.Build()
+
+		r := []string{"group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips"}
+		w.Write(r)
+
 		for _, p := range properties {
 			for _, o := range p.Origins {
 				w.Write([]string{
@@ -83,6 +84,24 @@ func (pr PropReport) Report() {
 					o.Pathmatch,
 					p.Siteshield,
 					strings.Join(o.Ips, " "),
+				})
+			}
+		}
+	}
+
+	if pr.ReportType == "host" {
+		pr.LoadHosts = true
+		properties := pr.Build()
+
+		r := []string{"group", "property", "host"}
+		w.Write(r)
+
+		for _, p := range properties {
+			for _, h := range p.Hosts {
+				w.Write([]string{
+					p.Groupname,
+					p.Propertyname,
+					h.Hostname,
 				})
 			}
 		}
@@ -129,8 +148,13 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 
 						hll := len(hl.Hostnames.Items)
 						hostnames := make([]string, hll, hll)
+						hosts := make([]*Hostinfo, 0, 10)
 						for hii, hiv := range hl.Hostnames.Items {
 							hostnames[hii] = hiv.CnameFrom
+							hostinfo := &Hostinfo{
+								Hostname: hiv.CnameFrom,
+							}
+							hosts = append(hosts, hostinfo)
 						}
 
 						prtrq := papi.GetRuleTreeRequest{
@@ -217,6 +241,7 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 							Propertyname: x.PropertyName,
 							Siteshield:   siteshield,
 							Origins:      origins,
+							Hosts:        hosts,
 						}
 						properties = append(properties, propinfo)
 					}
