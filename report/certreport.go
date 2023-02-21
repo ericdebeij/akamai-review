@@ -18,62 +18,6 @@ import (
 	"github.com/hako/durafmt"
 )
 
-type testclass struct {
-	edgeSession session.Session
-	dnsService  *akutil.Dns
-	diagService *aksv.DiagnosticsService
-	hosts       map[string]*hostinfo
-}
-
-type hostinfo struct {
-	hostname  string
-	status    string
-	err       string
-	cdn       string
-	subject   string
-	issuer    string
-	expire    time.Time
-	iscovered string
-}
-
-func (t *testclass) testhost(hostname string) (info *hostinfo) {
-	info = t.hosts[hostname]
-
-	ips, _, err := t.dnsService.DnsInfo(hostname)
-	if err != nil {
-		log.Errorf("dns error %w", err)
-	}
-
-	if len(ips) == 0 {
-		info.cdn = "no-ip"
-		return
-	}
-	_, akamaized, e := t.diagService.IsAkamaiIp(ips)
-
-	if e != nil {
-		info.err = e.Error()
-		return
-	}
-
-	if akamaized > 0 {
-		info.cdn = "akamai"
-	} else {
-		info.cdn = "other"
-	}
-
-	certs, err := akutil.Loadcerts(hostname)
-	if err != nil {
-		info.err = err.Error()
-		return
-	}
-
-	info.subject = certs[0].Subject.ToRDNSequence().String()
-	info.issuer = certs[0].Issuer.ToRDNSequence().String()
-	info.expire = certs[0].NotAfter
-
-	return
-}
-
 type CertReport struct {
 	EdgeSession    session.Session
 	DnsService     *akutil.Dns
@@ -86,14 +30,21 @@ type CertReport struct {
 	WarningDays    int
 }
 
-func (certreport CertReport) Report() {
-	tst := &testclass{}
-	tst.hosts = make(map[string]*hostinfo, 500)
+type hostinfo struct {
+	hostname  string
+	status    string
+	iscovered string
+	//clientinfo *ClientTest
+}
 
-	tst.edgeSession = certreport.EdgeSession
-	tst.diagService = certreport.DiagService
-	defer tst.diagService.FlushCache()
-	tst.dnsService = certreport.DnsService
+func (certreport CertReport) Report() {
+	tst := &aksv.ClientTester{}
+	hostlist := make(map[string]*hostinfo, 500)
+
+	tst.EdgeSession = certreport.EdgeSession
+	tst.DiagService = certreport.DiagService
+	defer tst.DiagService.FlushCache()
+	tst.DnsService = certreport.DnsService
 
 	f, err := os.Create(certreport.Export)
 	if err != nil {
@@ -104,7 +55,7 @@ func (certreport CertReport) Report() {
 	w := csv.NewWriter(f)
 	defer w.Flush()
 
-	secClient := appsec.Client(tst.edgeSession)
+	secClient := appsec.Client(tst.EdgeSession)
 
 	if certreport.UseCoverage {
 		coverageRequest := appsec.GetApiHostnameCoverageRequest{}
@@ -117,7 +68,7 @@ func (certreport CertReport) Report() {
 		for _, ch := range x.HostnameCoverage {
 			hn := strings.ToLower(ch.Hostname)
 
-			tst.hosts[hn] = &hostinfo{
+			hostlist[hn] = &hostinfo{
 				hostname:  hn,
 				iscovered: ch.Status,
 			}
@@ -126,9 +77,9 @@ func (certreport CertReport) Report() {
 
 	for _, hn := range certreport.UseHostnames {
 		hn = strings.ToLower(hn)
-		_, found := tst.hosts[hn]
+		_, found := hostlist[hn]
 		if !found {
-			tst.hosts[hn] = &hostinfo{
+			hostlist[hn] = &hostinfo{
 				hostname:  hn,
 				iscovered: "unknown",
 			}
@@ -146,9 +97,9 @@ func (certreport CertReport) Report() {
 			}
 		}
 
-		_, found := tst.hosts[hn]
+		_, found := hostlist[hn]
 		if found {
-			tst.hosts[hn].status = "skip"
+			hostlist[hn].status = "skip"
 		}
 	}
 	matchre := make([]*regexp.Regexp, 0, 10)
@@ -166,10 +117,10 @@ func (certreport CertReport) Report() {
 		}
 	}
 	n := time.Now()
-	fmt.Printf("Checking %d hosts\n", len(tst.hosts))
+	fmt.Printf("Checking %d hosts\n", len(hostlist))
 	r := []string{"hostname", "cdn", "subject", "issuer", "expire", "error", "covered"}
 	w.Write(r)
-	for hn, hi := range tst.hosts {
+	for hn, hi := range hostlist {
 		for _, re := range skipre {
 			if re.MatchString(hn) {
 				hi.status = "skip"
@@ -199,14 +150,14 @@ func (certreport CertReport) Report() {
 			continue
 		}
 
-		i := tst.testhost(hn)
-		w.Write([]string{i.hostname, i.cdn, i.subject, i.issuer, i.expire.String(), i.err, i.iscovered})
-		if i.err == "" && i.cdn == "akamai" && n.After(i.expire.AddDate(0, 0, 0-certreport.WarningDays)) {
-			fmt.Println("Host       :", i.hostname)
-			fmt.Println("Expire date:", i.expire)
-			fmt.Println("Subject    :", i.subject)
-			fmt.Println("Issuer     :", i.issuer)
-			diff := i.expire.Sub(n)
+		i := tst.Testhost(hn)
+		w.Write([]string{i.Hostname, i.Cdn, i.Subject, i.Issuer, i.Expire.String(), i.Err, hi.iscovered})
+		if i.Err == "" && i.Cdn == "akamai" && n.After(i.Expire.AddDate(0, 0, 0-certreport.WarningDays)) {
+			fmt.Println("Host       :", i.Hostname)
+			fmt.Println("Expire date:", i.Expire)
+			fmt.Println("Subject    :", i.Subject)
+			fmt.Println("Issuer     :", i.Issuer)
+			diff := i.Expire.Sub(n)
 			dura := durafmt.Parse(diff)
 			fmt.Println("Time left:", dura)
 		}

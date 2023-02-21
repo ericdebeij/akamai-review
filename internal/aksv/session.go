@@ -1,6 +1,8 @@
 package aksv
 
 import (
+	"fmt"
+
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgegrid"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/apex/log"
@@ -25,6 +27,11 @@ func NewSession(param *EdgeConfig) (s session.Session, err error) {
 		return
 	}
 
+	if edgerc.Host == "" {
+		//err = fmt.Errorf("EdgeRC section not found: %s", akutil.StructToColumns(*param))
+		err = fmt.Errorf("edgerc section not found, edgerc:'%s, section %s' ", param.Edgerc, param.Section)
+		return
+	}
 	//fmt.Println(edgerc)
 	s, err = session.New(
 		session.WithSigner(edgerc),

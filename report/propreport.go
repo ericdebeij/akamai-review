@@ -35,7 +35,9 @@ type PropertyInfo struct {
 }
 
 type Hostinfo struct {
-	Hostname string
+	Hostname   string
+	Edgehost   string
+	Clientinfo *aksv.ClientInfo
 }
 
 type OriginInfo struct {
@@ -93,7 +95,7 @@ func (pr PropReport) Report() {
 		pr.LoadHosts = true
 		properties := pr.Build()
 
-		r := []string{"group", "property", "host"}
+		r := []string{"group", "property", "host", "edgehost", "cdn", "ips"}
 		w.Write(r)
 
 		for _, p := range properties {
@@ -102,6 +104,9 @@ func (pr PropReport) Report() {
 					p.Groupname,
 					p.Propertyname,
 					h.Hostname,
+					h.Edgehost,
+					h.Clientinfo.Cdn,
+					strings.Join(h.Clientinfo.Ips, " "),
 				})
 			}
 		}
@@ -109,6 +114,13 @@ func (pr PropReport) Report() {
 }
 
 func (pr PropReport) Build() (properties []*PropertyInfo) {
+
+	clienttest := &aksv.ClientTester{
+		EdgeSession: pr.EdgeSession,
+		DnsService:  pr.DnsService,
+		DiagService: pr.DiagService,
+	}
+
 	properties = make([]*PropertyInfo, 0, 1000)
 	groupResponse, err := pr.PropService.PapiClient.GetGroups(context.Background())
 	if err != nil {
@@ -151,9 +163,13 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 						hosts := make([]*Hostinfo, 0, 10)
 						for hii, hiv := range hl.Hostnames.Items {
 							hostnames[hii] = hiv.CnameFrom
+
 							hostinfo := &Hostinfo{
-								Hostname: hiv.CnameFrom,
+								Hostname:   hiv.CnameFrom,
+								Edgehost:   hiv.CnameTo,
+								Clientinfo: clienttest.Testhost(hiv.CnameFrom),
 							}
+
 							hosts = append(hosts, hostinfo)
 						}
 

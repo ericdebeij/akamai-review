@@ -4,9 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
 	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
 	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
@@ -16,24 +13,35 @@ import (
 )
 
 // propertiesCmd represents the properties command
-var propertiesCmd = &cobra.Command{
-	Use:   "properties",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		properties()
-	},
-}
-
-var preportname string
 
 func init() {
-	rootCmd.AddCommand(propertiesCmd)
+
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "properties",
+		Short: "report on properties in the account",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			properties("properties")
+		},
+	})
+
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "properties-origin",
+		Short: "report on origins used in the properties in the account",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			properties("origin")
+		},
+	})
+
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "properties-host",
+		Short: "report on hosts used in the properties in the account",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			properties("host")
+		},
+	})
 
 	// Here you will define your flags and configuration settings.
 
@@ -44,14 +52,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// propertiesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	propertiesCmd.Flags().StringVar(&preportname, "report", "", "name of the report, options: origin")
+	//propertiesCmd.Flags().StringVar(&preportname, "report", "", "name of the report, options: origin")
 }
 
-func properties() {
-	if preportname == "" {
-		fmt.Fprint(os.Stderr, "report name mandatory\n")
-		os.Exit(1)
-	}
+func properties(reportname string) {
 	papiClient := papi.Client(akamaiSession)
 	propreport := report.PropReport{
 		EdgeSession: akamaiSession,
@@ -60,7 +64,7 @@ func properties() {
 		PropService: aksv.NewPropertyService(papiClient, viper.GetString("akamai.cache")),
 		Export:      viper.GetString("export"),
 		Group:       viper.GetString("report.group"),
-		ReportType:  preportname,
+		ReportType:  reportname,
 	}
 	propreport.Report()
 }

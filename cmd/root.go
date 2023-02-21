@@ -87,8 +87,9 @@ func openSession() {
 
 	sess, err := aksv.NewSession(akamaiConfig)
 	if err != nil {
-		log.Errorf("akamai-session %w", err)
+		log.Errorf("session error %v", err)
 		os.Exit(1)
 	}
+
 	akamaiSession = sess
 }
