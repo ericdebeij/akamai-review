@@ -16,14 +16,16 @@ import (
 
 func init() {
 
-	rootCmd.AddCommand(&cobra.Command{
+	propcmd := &cobra.Command{
 		Use:   "properties",
 		Short: "report on properties in the account",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			properties("properties")
 		},
-	})
+	}
+	ReportParameters(propcmd, "export", "group")
+	rootCmd.AddCommand(propcmd)
 
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "properties-origin",
@@ -56,15 +58,21 @@ func init() {
 }
 
 func properties(reportname string) {
+	defaultParam.Type = "properties-" + reportname
+	propreport(&defaultParam)
+}
+
+func propreport(rp *ReportFields) {
 	papiClient := papi.Client(akamaiSession)
 	propreport := report.PropReport{
 		EdgeSession: akamaiSession,
 		DnsService:  akutil.NewDnsService(viper.GetString("resolver")),
 		DiagService: aksv.NewDiagnosticsService(akamaiSession, viper.GetString("akamai.cache")),
 		PropService: aksv.NewPropertyService(papiClient, viper.GetString("akamai.cache")),
-		Export:      viper.GetString("export"),
-		Group:       viper.GetString("report.group"),
-		ReportType:  reportname,
+		Export:      rp.Export,
+		Group:       rp.Group,
+		ReportType:  rp.Type,
 	}
 	propreport.Report()
+
 }

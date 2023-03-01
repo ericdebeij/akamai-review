@@ -50,6 +50,9 @@ type OriginInfo struct {
 }
 
 func (pr PropReport) Report() {
+	if strings.HasPrefix(pr.ReportType, "properties-") {
+		pr.ReportType = pr.ReportType[11:]
+	}
 
 	if pr.ReportType != "origin" && pr.ReportType != "host" {
 		log.Fatalf("not (yet) supported report", pr.ReportType)
