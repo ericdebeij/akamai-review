@@ -3,6 +3,7 @@ package cmd
 import (
 	"strings"
 
+	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,7 +29,11 @@ func ReportParameters(cmd *cobra.Command, param ...string) {
 		case "group":
 			cmd.Flags().StringVar(&defaultParam.Group, "group", "", "group identification")
 		case "export":
-			cmd.Flags().StringVar(&defaultParam.Contract, "export", "", "export filename")
+			defaultExport := cmd.Use + ".csv"
+			if akutil.FindString(param, "period") >= 0 {
+				defaultExport = cmd.Use + "-PERIOD.csv"
+			}
+			cmd.Flags().StringVar(&defaultParam.Export, "export", defaultExport, "export filename")
 		}
 	}
 	//reportCmd.Flags().StringVar(&reportName, "name", "", "limit to specific report")

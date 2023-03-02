@@ -15,7 +15,7 @@ import (
 	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
 )
 
-const cfgDefaultFile = "~/.akamai-review.yaml"
+const cfgDefaultFile = ".akamai-review.yaml"
 
 var cfgFile string
 
