@@ -23,7 +23,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "akamai-review",
 	Short: "Review your account assets",
-	Long: `akamai-review is a library to extract information from
+	Long: `akamai-review is a utility collection to extract information from
 your akamai account and perform checks on it that need to be performed
 on a regular base.`,
 	// Uncomment the following line if your bare application
