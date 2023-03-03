@@ -21,29 +21,33 @@ func init() {
 		Short: "report on properties in the account",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			properties("properties")
+			runreport("properties")
 		},
 	}
 	ReportParameters(propcmd, "export", "group")
 	rootCmd.AddCommand(propcmd)
 
-	rootCmd.AddCommand(&cobra.Command{
+	propOriginCmd := &cobra.Command{
 		Use:   "properties-origin",
 		Short: "report on origins used in the properties in the account",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			properties("origin")
+			runreport("properties-origin")
 		},
-	})
+	}
+	ReportParameters(propOriginCmd, "export", "group")
+	rootCmd.AddCommand(propOriginCmd)
 
-	rootCmd.AddCommand(&cobra.Command{
+	propHostCmd := &cobra.Command{
 		Use:   "properties-host",
 		Short: "report on hosts used in the properties in the account",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			properties("host")
+			runreport("properties-host")
 		},
-	})
+	}
+	ReportParameters(propHostCmd, "export", "group")
+	rootCmd.AddCommand(propHostCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -55,11 +59,6 @@ func init() {
 	// is called directly, e.g.:
 	// propertiesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	//propertiesCmd.Flags().StringVar(&preportname, "report", "", "name of the report, options: origin")
-}
-
-func properties(reportname string) {
-	defaultParam.Type = "properties-" + reportname
-	propreport(&defaultParam)
 }
 
 func propreport(rp *ReportFields) {

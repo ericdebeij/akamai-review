@@ -14,13 +14,13 @@ import (
 
 // certificatesCmd represents the certificates command
 var certificatesCmd = &cobra.Command{
-	Use:   "certificates",
+	Use:   "certificates-validate",
 	Short: "Check your certificates",
 	Long: `Collect information regarding the status of your certificates,
 	collect hosts from certificate locations in the account and checks
 	the related certificate status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		certificates()
+		certificatesValidate()
 	},
 }
 
@@ -39,7 +39,7 @@ func init() {
 	// certificatesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func certificates() {
+func certificatesValidate() {
 	certreport := report.CertReport{
 		EdgeSession:    akamaiSession,
 		DnsService:     akutil.NewDnsService(viper.GetString("resolver")),

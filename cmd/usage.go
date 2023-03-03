@@ -21,25 +21,26 @@ func init() {
 		Long: `This report extracts traffic information for the requested period (default the previous period)
 		and compares this with the period before`,
 		Run: func(cmd *cobra.Command, args []string) {
-			defaultParam.Type = "usage-cpcode"
-			usagereport(&defaultParam)
+			runreport("usage-cpcode")
 		},
 	}
 	ReportParameters(bycpcodeCmd, "contract", "product", "period", "export")
 	rootCmd.AddCommand(bycpcodeCmd)
+	/*
+	   	byrpgroupCmd := &cobra.Command{
+	   		Use:   "usage-reportinggroup",
+	   		Short: "Reports based on usage as part of the billing data",
+	   		Long: `This report extracts traffic information for the requested period (default the previous period)
+	   		and compares this with the period before`,
+	   		Run: func(cmd *cobra.Command, args []string) {
+	   			defaultParam.Type = "usage-reportinggroup"
+	   			usagereport(&defaultParam)
+	   		},
+	   	}
 
-	byrpgroupCmd := &cobra.Command{
-		Use:   "usage-reportinggroup",
-		Short: "Reports based on usage as part of the billing data",
-		Long: `This report extracts traffic information for the requested period (default the previous period)
-		and compares this with the period before`,
-		Run: func(cmd *cobra.Command, args []string) {
-			defaultParam.Type = "usage-reportinggroup"
-			usagereport(&defaultParam)
-		},
-	}
-	ReportParameters(byrpgroupCmd, "contract", "product", "period", "export")
-	rootCmd.AddCommand(byrpgroupCmd)
+	   ReportParameters(byrpgroupCmd, "contract", "product", "period", "export")
+	   rootCmd.AddCommand(byrpgroupCmd)
+	*/
 }
 
 func usagereport(rp *ReportFields) {
