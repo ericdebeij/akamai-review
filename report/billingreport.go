@@ -14,15 +14,16 @@ import (
 	"github.com/ericdebeij/akamai-review/v2/internal/yearmonth"
 )
 
-type UsageCpcode struct {
+type BillingUsage struct {
 	EdgeSession    session.Session
 	BillingService *aksv.BillingService
 	CpCodeService  *aksv.CpcodeService
 
-	Contract string
-	Product  string
-	Period   string
-	Export   string
+	ReportType string
+	Contract   string
+	Product    string
+	Period     string
+	Export     string
 }
 
 type r struct {
@@ -32,7 +33,7 @@ type r struct {
 	currentHits  float64
 }
 
-func (ur UsageCpcode) Report() {
+func (ur BillingUsage) Report() {
 
 	tm := yearmonth.Add(ur.Period, 1)
 	fm := yearmonth.Add(tm, -2)

@@ -62,7 +62,7 @@ func runreport() {
 		if reportName != "" && repname != reportName {
 			continue
 		}
-		if repdef.Type == "usagecpcode" {
+		if strings.HasPrefix(repdef.Type, "usage-cpcode") {
 			usagereport(repdef)
 		}
 
