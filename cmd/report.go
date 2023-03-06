@@ -3,7 +3,6 @@ package cmd
 import (
 	"strings"
 
-	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -38,11 +37,7 @@ func ReportParameters(cmd *cobra.Command, param ...string) {
 		case "group":
 			cmd.Flags().StringVar(&defaultReport.Group, "group", "", "group identification")
 		case "export":
-			defaultExport := cmd.Use + ".csv"
-			if akutil.FindString(param, "period") >= 0 {
-				defaultExport = cmd.Use + "-PERIOD.csv"
-			}
-			cmd.Flags().StringVar(&defaultReport.Export, "export", defaultExport, "export filename")
+			cmd.Flags().StringVar(&defaultReport.Export, "export", "", "export filename")
 		}
 	}
 	//reportCmd.Flags().StringVar(&reportName, "name", "", "limit to specific report")
@@ -79,7 +74,7 @@ func runreport(reportType string) (runned int) {
 	viper.UnmarshalKey("reports", &reports)
 	for repname, repdef := range reports {
 		repdef.Period = defaultValue(repdef.Period, defaultReport.Period)
-		repdef.Export = defaultValue(repdef.Export, defaultReport.Export)
+		repdef.Export = defaultValue(repdef.Export, defaultReport.Export, repname+".csv")
 		repdef.Contract = defaultValue(repdef.Contract, defaultReport.Contract)
 		repdef.Group = defaultValue(repdef.Group, defaultReport.Group)
 
@@ -95,6 +90,7 @@ func runreport(reportType string) (runned int) {
 	}
 	if runned == 0 && reportType != "" {
 		defaultReport.Type = reportType
+		defaultReport.Export = defaultValue(defaultReport.Export, reportType+".csv")
 		runareport(&defaultReport)
 	}
 	return
