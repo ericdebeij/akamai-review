@@ -1,6 +1,7 @@
 package aksv
 
 import (
+	"strings"
 	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
@@ -32,7 +33,11 @@ func (t *ClientTester) Testhost(hostname string) (info *ClientInfo) {
 		Hostname: hostname,
 	}
 
-	ips, _, err := t.DnsService.DnsInfo(hostname)
+	hn := hostname
+	if strings.HasPrefix(hn, "*.") {
+		hn = "wildcard" + hn[1:]
+	}
+	ips, _, err := t.DnsService.DnsInfo(hn)
 	if err != nil {
 		log.Errorf("dns error %w", err)
 	}

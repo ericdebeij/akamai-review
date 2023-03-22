@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/appsec"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/cps"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/session"
 	"github.com/apex/log"
 	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
@@ -25,15 +26,18 @@ type CertReport struct {
 	Export         string
 	UseCoverage    bool
 	UseHostnames   []string
+	UseCps         bool
 	SkipHostnames  []string
 	MatchHostnames []string
 	WarningDays    int
+	Contracts      []string
 }
 
 type hostinfo struct {
-	hostname  string
-	status    string
-	iscovered string
+	hostname    string
+	status      string
+	iscovered   string
+	enrollments []string
 	//clientinfo *ClientTest
 }
 
@@ -71,6 +75,54 @@ func (certreport CertReport) Report() {
 			hostlist[hn] = &hostinfo{
 				hostname:  hn,
 				iscovered: ch.Status,
+			}
+		}
+	}
+
+	if certreport.UseCps {
+		cpsClient := cps.Client(certreport.EdgeSession)
+
+		for _, contract := range certreport.Contracts {
+			listenrollreq := cps.ListEnrollmentsRequest{
+				ContractID: contract,
+			}
+			listenrollresp, err := cpsClient.ListEnrollments(context.Background(), listenrollreq)
+			if err != nil {
+				log.Fatalf("list enrollments %w", err)
+				return
+			}
+			for _, rl := range listenrollresp.Enrollments {
+				hn := strings.ToLower(rl.CSR.CN)
+				he, found := hostlist[hn]
+				if !found {
+					he = &hostinfo{
+						hostname:    hn,
+						enrollments: []string{},
+					}
+				}
+				//idcode := fmt.Sprintf("%s(%d)", rl.CSR.CN, rl.e  )
+				he.enrollments = akutil.UpsertString(he.enrollments, rl.CSR.CN)
+				hostlist[hn] = he
+				sans := rl.CSR.SANS
+				if rl.NetworkConfiguration.DNSNameSettings != nil {
+					if len(rl.NetworkConfiguration.DNSNameSettings.DNSNames) > 0 {
+						sans = rl.NetworkConfiguration.DNSNameSettings.DNSNames
+					}
+				}
+
+				for _, san := range sans {
+					hn := strings.ToLower(san)
+					he, found := hostlist[hn]
+					if !found {
+						he = &hostinfo{
+							hostname:    hn,
+							enrollments: []string{},
+						}
+					}
+					//idcode := fmt.Sprintf("%s(%d)", rl.CSR.CN, rl.e  )
+					he.enrollments = akutil.UpsertString(he.enrollments, rl.CSR.CN)
+					hostlist[hn] = he
+				}
 			}
 		}
 	}
@@ -134,6 +186,7 @@ func (certreport CertReport) Report() {
 				break
 			}
 		}
+
 		if !found {
 			for _, hx := range matchexact {
 				if hx == hn {

@@ -50,6 +50,8 @@ func certificatesValidate() {
 		SkipHostnames:  viper.GetStringSlice("input.skiphosts"),
 		MatchHostnames: viper.GetStringSlice("input.matchhosts"),
 		WarningDays:    viper.GetInt("warning.days"),
+		UseCps:         viper.GetBool("input.cps"),
+		Contracts:      viper.GetStringSlice("input.contracts"),
 	}
 	certreport.Report()
 }
