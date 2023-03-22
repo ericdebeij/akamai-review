@@ -16,6 +16,13 @@ func FindString(a []string, s string) int {
 	}
 	return -1
 }
+func UpsertString(a []string, s string) []string {
+	i := FindString(a, s)
+	if i < 0 {
+		a = append(a, s)
+	}
+	return a
+}
 
 func FindInt(a []int, s int) int {
 	for i := range a {
