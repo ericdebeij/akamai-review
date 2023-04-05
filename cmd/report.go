@@ -3,6 +3,7 @@ package cmd
 import (
 	"strings"
 
+	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -17,15 +18,6 @@ type ReportFields struct {
 }
 
 var defaultReport ReportFields
-
-func defaultValue(v ...string) string {
-	for _, x := range v {
-		if x != "" {
-			return x
-		}
-	}
-	return ""
-}
 
 func ReportParameters(cmd *cobra.Command, param ...string) {
 	for _, p := range param {
@@ -75,11 +67,11 @@ func runreport(reportType string) (runned int) {
 	reports := make(map[string]*ReportFields)
 	viper.UnmarshalKey("reports", &reports)
 	for repname, repdef := range reports {
-		repdef.Period = defaultValue(repdef.Period, defaultReport.Period)
-		repdef.Export = defaultValue(repdef.Export, defaultReport.Export, repname+".csv")
-		repdef.Contract = defaultValue(repdef.Contract, defaultReport.Contract)
-		repdef.Product = defaultValue(repdef.Product, defaultReport.Product)
-		repdef.Group = defaultValue(repdef.Group, defaultReport.Group)
+		repdef.Period = akutil.DefaultValue(repdef.Period, defaultReport.Period)
+		repdef.Export = akutil.DefaultValue(repdef.Export, defaultReport.Export, repname+".csv")
+		repdef.Contract = akutil.DefaultValue(repdef.Contract, defaultReport.Contract)
+		repdef.Product = akutil.DefaultValue(repdef.Product, defaultReport.Product)
+		repdef.Group = akutil.DefaultValue(repdef.Group, defaultReport.Group)
 
 		if reportName != "" && repname != reportName {
 			continue

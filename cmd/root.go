@@ -43,7 +43,8 @@ func Execute() {
 func init() {
 
 	akamaiConfig = &aksv.EdgeConfig{}
-
+	viper.SetDefault("akamai.edgerc", "~/.edgerc")
+	viper.SetDefault("akamai.section", "default")
 	viper.SetDefault("resolver", "8.8.8.8:53")
 	viper.SetDefault("export", "export.csv")
 	viper.SetDefault("log.level", "INFO")

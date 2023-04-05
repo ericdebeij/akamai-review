@@ -100,3 +100,12 @@ func JoinIntA(ia []int, del string) (s string) {
 	}
 	return
 }
+
+func DefaultValue(v ...string) string {
+	for _, x := range v {
+		if x != "" {
+			return x
+		}
+	}
+	return ""
+}
