@@ -34,7 +34,9 @@ type r struct {
 }
 
 func (ur BillingUsage) Report() {
-
+	if ur.Contract == "" || ur.Product == "" {
+		log.Fatalf("Contract and Product are mandatory parameters for usage-cpcode")
+	}
 	tm := yearmonth.Add(ur.Period, 1)
 	fm := yearmonth.Add(tm, -2)
 	x, err := ur.BillingService.GetUsageCpcode(ur.Contract, ur.Product, fm, tm)
