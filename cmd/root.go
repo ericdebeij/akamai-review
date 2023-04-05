@@ -46,6 +46,7 @@ func init() {
 
 	viper.SetDefault("resolver", "8.8.8.8:53")
 	viper.SetDefault("export", "export.csv")
+	viper.SetDefault("log.level", "INFO")
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")
 	rootCmd.PersistentFlags().StringVar(&akamaiConfig.Edgerc, "edgerc", "", "location of the credentials file")
 	rootCmd.PersistentFlags().StringVar(&akamaiConfig.Section, "section", "", "section of the credentials file")
@@ -64,9 +65,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
+		log.SetLevelFromString(viper.GetString("log.level"))
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	} else if !errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
-
 		log.Infof("error reading config file: %s error %w", viper.ConfigFileUsed(), err)
 	}
 
