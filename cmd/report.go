@@ -86,9 +86,9 @@ func runreport(reportType string) (runned int) {
 	if runned == 0 && reportType != "" {
 		defaultReport.Type = reportType
 		if reportType == "usage-cpcode" {
-			defaultReport.Export = defaultValue(defaultReport.Export, "usage-cpcode-PERIOD.csv")
+			defaultReport.Export = akutil.DefaultValue(defaultReport.Export, "usage-cpcode-PERIOD.csv")
 		} else {
-			defaultReport.Export = defaultValue(defaultReport.Export, reportType+".csv")
+			defaultReport.Export = akutil.DefaultValue(defaultReport.Export, reportType+".csv")
 		}
 		runareport(&defaultReport)
 	}
