@@ -16,8 +16,13 @@ type EdgeConfig struct {
 
 func NewSession(param *EdgeConfig) (s session.Session, err error) {
 	edgercOps := []edgegrid.Option{edgegrid.WithEnv(true)}
-	edgercOps = append(edgercOps, edgegrid.WithFile(param.Edgerc))
-	edgercOps = append(edgercOps, edgegrid.WithSection(param.Section))
+	if param.Edgerc != "" {
+		edgercOps = append(edgercOps, edgegrid.WithFile(param.Edgerc))
+	}
+
+	if param.Section != "" {
+		edgercOps = append(edgercOps, edgegrid.WithSection(param.Section))
+	}
 
 	edgerc, err := edgegrid.New(edgercOps...)
 	edgerc.AccountKey = param.AccountID
