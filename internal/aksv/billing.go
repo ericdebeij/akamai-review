@@ -148,7 +148,6 @@ func (bs *BillingService) GetUsageProducts(contractId string, startMonth, endMon
 	return
 }
 func (bs *BillingService) GetUsageCpcode(contractId, productId, startMonth, endMonth string) (msum *GetMonthlySummaryResponse, err error) {
-
 	url := fmt.Sprintf("/billing/v1/contracts/%s/products/%s/usage/by-cp-code/monthly-summary?start=%s&end=%s", contractId, productId, startMonth, endMonth)
 	log.Debug(url)
 	req, err2 := http.NewRequest(http.MethodGet, url, nil)
@@ -160,9 +159,14 @@ func (bs *BillingService) GetUsageCpcode(contractId, productId, startMonth, endM
 	msum = &GetMonthlySummaryResponse{}
 
 	bs.Response, err = bs.Session.Exec(req, msum)
+
 	if err != nil {
 		log.Fatalf("response error: %w", err)
 		return
+	}
+
+	if bs.Response.StatusCode >= 400 {
+		log.Fatalf("statuscode indicates error: %v", bs.Response.StatusCode)
 	}
 
 	return

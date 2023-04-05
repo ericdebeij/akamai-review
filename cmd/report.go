@@ -34,6 +34,8 @@ func ReportParameters(cmd *cobra.Command, param ...string) {
 			cmd.Flags().StringVar(&defaultReport.Period, "period", "", "period, format YYYY-MM")
 		case "contract":
 			cmd.Flags().StringVar(&defaultReport.Contract, "contract", "", "contract identification")
+		case "product":
+			cmd.Flags().StringVar(&defaultReport.Product, "product", "", "product identification")
 		case "group":
 			cmd.Flags().StringVar(&defaultReport.Group, "group", "", "group identification")
 		case "export":
@@ -76,6 +78,7 @@ func runreport(reportType string) (runned int) {
 		repdef.Period = defaultValue(repdef.Period, defaultReport.Period)
 		repdef.Export = defaultValue(repdef.Export, defaultReport.Export, repname+".csv")
 		repdef.Contract = defaultValue(repdef.Contract, defaultReport.Contract)
+		repdef.Product = defaultValue(repdef.Product, defaultReport.Product)
 		repdef.Group = defaultValue(repdef.Group, defaultReport.Group)
 
 		if reportName != "" && repname != reportName {
