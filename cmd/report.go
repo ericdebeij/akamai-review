@@ -93,7 +93,11 @@ func runreport(reportType string) (runned int) {
 	}
 	if runned == 0 && reportType != "" {
 		defaultReport.Type = reportType
-		defaultReport.Export = defaultValue(defaultReport.Export, reportType+".csv")
+		if reportType == "usage-cpcode" {
+			defaultReport.Export = defaultValue(defaultReport.Export, "usage-cpcode-PERIOD.csv")
+		} else {
+			defaultReport.Export = defaultValue(defaultReport.Export, reportType+".csv")
+		}
 		runareport(&defaultReport)
 	}
 	return
