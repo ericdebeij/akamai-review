@@ -1,17 +1,35 @@
-package aksv
+package svsession
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/edgegrid"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/edgegrid"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/session"
 	"github.com/apex/log"
+	"github.com/apex/log/handlers/text"
 )
 
 type EdgeConfig struct {
 	Edgerc    string
 	Section   string
 	AccountID string
+	Logger    log.Interface
+}
+
+func CreateLogger(filename string, level log.Level) *log.Logger {
+	// Replace "your_log_file.log" with the desired file name and path
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalf("failed to open log file: %v", err)
+	}
+
+	logger := &log.Logger{
+		Handler: text.New(file),
+		Level:   log.DebugLevel, // Set log level as desired (e.g., log.DebugLevel, log.InfoLevel, log.WarnLevel, log.ErrorLevel)
+	}
+
+	return logger
 }
 
 func NewSession(param *EdgeConfig) (s session.Session, err error) {
@@ -41,7 +59,7 @@ func NewSession(param *EdgeConfig) (s session.Session, err error) {
 	s, err = session.New(
 		session.WithSigner(edgerc),
 		session.WithHTTPTracing(true),
-		session.WithLog(log.Log),
+		session.WithLog(param.Logger),
 	)
 	return
 }

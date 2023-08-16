@@ -1,29 +1,24 @@
-package report
+package usagereport
 
 import (
 	"encoding/csv"
 	"fmt"
 	"strings"
+	"time"
 
 	"os"
 	"strconv"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/apex/log"
-	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
-	"github.com/ericdebeij/akamai-review/v2/internal/yearmonth"
+	"github.com/ericdebeij/akamai-review/v3/conv/yearmonth"
+	"github.com/ericdebeij/akamai-review/v3/services"
 )
 
-type BillingUsage struct {
-	EdgeSession    session.Session
-	BillingService *aksv.BillingService
-	CpCodeService  *aksv.CpcodeService
-
-	ReportType string
-	Contract   string
-	Product    string
-	Period     string
-	Export     string
+type UsageMonth struct {
+	Contract string
+	Product  string
+	Period   string
+	Export   string
 }
 
 type r struct {
@@ -33,13 +28,20 @@ type r struct {
 	currentHits  float64
 }
 
-func (ur BillingUsage) Report() {
+func (ur UsageMonth) Report() {
+	srvs := services.Services
 	if ur.Contract == "" || ur.Product == "" {
 		log.Fatalf("Contract and Product are mandatory parameters for usage-cpcode")
 	}
+	if ur.Period == "" {
+		ur.Period = yearmonth.Add(yearmonth.FromTime(time.Now()), -1)
+	}
+	ur.Export = strings.NewReplacer("PERIOD", ur.Period).Replace(ur.Export)
+	fmt.Println(ur.Export)
+
 	tm := yearmonth.Add(ur.Period, 1)
 	fm := yearmonth.Add(tm, -2)
-	x, err := ur.BillingService.GetUsageCpcode(ur.Contract, ur.Product, fm, tm)
+	x, err := srvs.AkamaiBilling.GetUsageCpcode(ur.Contract, ur.Product, fm, tm)
 	sum := make(map[int]r, 5000)
 	if err != nil {
 		log.Fatalf("usage by cpcode: %w", err)
@@ -73,13 +75,13 @@ func (ur BillingUsage) Report() {
 		}
 	}
 
-	cpinfos, err := ur.CpCodeService.GetCpcodes()
+	cpinfos, err := srvs.AkamaiCpcodes.GetCpcodes()
 	if err != nil {
 		log.Fatalf("cpcode error: %w", err)
 		return
 	}
 
-	rginfos, err := ur.CpCodeService.GetRepgroups("")
+	rginfos, err := srvs.AkamaiCpcodes.GetRepgroups("")
 	if err != nil {
 		log.Fatalf("reportinggroup error: %w", err)
 		return

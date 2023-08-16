@@ -1,13 +1,13 @@
-package aksv
+package svbilling
 
 import (
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/session"
 	"github.com/apex/log"
-	"github.com/ericdebeij/akamai-review/v2/internal/yearmonth"
+	"github.com/ericdebeij/akamai-review/v3/conv/yearmonth"
 )
 
 type ProductInfo struct {

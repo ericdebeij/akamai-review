@@ -1,9 +1,9 @@
-package aksv
+package cpcodes
 
 import (
 	"net/http"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/session"
 )
 
 type CpcodeService struct {
@@ -73,6 +73,15 @@ type Repgroup struct {
 	AccessGroup        AccessGroupshort    `json:"accessGroup"`
 }
 
+func (rgs *Repgroups) FindByName(name string) (rg *Repgroup) {
+	for i := range rgs.Groups {
+		if rgs.Groups[i].ReportingGroupName == name {
+			return &rgs.Groups[i]
+		}
+	}
+	return
+}
+
 func (rg *Repgroup) FindCpcode(cpcode int) (found bool) {
 	for i := range rg.Contracts {
 		for j := range rg.Contracts[i].Cpcodes {
@@ -109,6 +118,25 @@ func (cs *CpcodeService) GetRepgroups(filter string) (repGroups *Repgroups, err 
 	repGroups = &Repgroups{}
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	cs.Response, err = cs.Session.Exec(req, &repGroups)
+
+	return
+}
+
+func (repGroups *Repgroups) MapCpcodeRepgroup() (m map[int][]int) {
+	m = make(map[int][]int)
+	for _, g := range repGroups.Groups {
+		for _, c := range g.Contracts {
+			for _, cp := range c.Cpcodes {
+				_, f := m[cp.CpcodeID]
+				if f {
+					m[cp.CpcodeID] = append(m[cp.CpcodeID], g.ReportingGroupID)
+				} else {
+					m[cp.CpcodeID] = make([]int, 1, 3)
+					m[cp.CpcodeID][0] = g.ReportingGroupID
+				}
+			}
+		}
+	}
 
 	return
 }

@@ -1,29 +1,28 @@
-package report
+package propreport
 
 import (
 	"context"
-	"encoding/csv"
 	"fmt"
-	"os"
 	"strings"
+	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/apex/log"
-	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
-	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
+	"github.com/ericdebeij/akamai-review/v3/exportx"
+	"github.com/ericdebeij/akamai-review/v3/service/clienttest"
+	"github.com/ericdebeij/akamai-review/v3/services"
+	"github.com/hako/durafmt"
 )
 
-type PropReport struct {
-	EdgeSession session.Session
-	DnsService  *akutil.Dns
-	DiagService *aksv.DiagnosticsService
-	PropService *aksv.Propsv
-	ReportType  string
+type HostReport struct {
 	Export      string
 	Group       string
-	LoadRules   bool
-	LoadHosts   bool
+	WarningDays int
+}
+
+type OriginReport struct {
+	Export string
+	Group  string
 }
 
 type PropertyInfo struct {
@@ -37,7 +36,7 @@ type PropertyInfo struct {
 type Hostinfo struct {
 	Hostname   string
 	Edgehost   string
-	Clientinfo *aksv.ClientInfo
+	Clientinfo *clienttest.ClientInfo
 }
 
 type OriginInfo struct {
@@ -49,83 +48,79 @@ type OriginInfo struct {
 	Ips        []string
 }
 
-func (pr PropReport) Report() {
-	if strings.HasPrefix(pr.ReportType, "properties-") {
-		pr.ReportType = pr.ReportType[11:]
-	}
-
-	if pr.ReportType != "origin" && pr.ReportType != "host" {
-		log.Fatalf("not (yet) supported report", pr.ReportType)
-	}
-
-	log.Infof("property report %v", pr.Export)
-
-	f, err := os.Create(pr.Export)
+func (or OriginReport) Report() {
+	csvx, err := exportx.Create(or.Export)
 	if err != nil {
 		log.Fatalf("failed to open file %w", err)
 	}
-	defer f.Close()
+	defer csvx.Close()
 
-	w := csv.NewWriter(f)
-	defer w.Flush()
+	properties := Build(or.Group)
 
-	if pr.ReportType == "origin" {
-		pr.LoadRules = true
-		properties := pr.Build()
+	csvx.Header("group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips")
 
-		r := []string{"group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips"}
-		w.Write(r)
-
-		for _, p := range properties {
-			for _, o := range p.Origins {
-				w.Write([]string{
-					p.Groupname,
-					p.Propertyname,
-					//strings.Join(hostnames, " "),
-					o.Origin,
-					o.Type,
-					o.Hostheader,
-					o.Hostmatch,
-					o.Pathmatch,
-					p.Siteshield,
-					strings.Join(o.Ips, " "),
-				})
-			}
-		}
-	}
-
-	if pr.ReportType == "host" {
-		pr.LoadHosts = true
-		properties := pr.Build()
-
-		r := []string{"group", "property", "host", "edgehost", "cdn", "ips"}
-		w.Write(r)
-
-		for _, p := range properties {
-			for _, h := range p.Hosts {
-				w.Write([]string{
-					p.Groupname,
-					p.Propertyname,
-					h.Hostname,
-					h.Edgehost,
-					h.Clientinfo.Cdn,
-					strings.Join(h.Clientinfo.Ips, " "),
-				})
-			}
+	for _, p := range properties {
+		for _, o := range p.Origins {
+			csvx.Write(
+				p.Groupname,
+				p.Propertyname,
+				//strings.Join(hostnames, " "),
+				o.Origin,
+				o.Type,
+				o.Hostheader,
+				o.Hostmatch,
+				o.Pathmatch,
+				p.Siteshield,
+				strings.Join(o.Ips, " "),
+			)
 		}
 	}
 }
-
-func (pr PropReport) Build() (properties []*PropertyInfo) {
-
-	clienttest := &aksv.ClientTester{
-		EdgeSession: pr.EdgeSession,
-		DnsService:  pr.DnsService,
-		DiagService: pr.DiagService,
+func (hr HostReport) Report() {
+	csvx, err := exportx.Create(hr.Export)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
+	defer csvx.Close()
 
+	properties := Build(hr.Group)
+
+	csvx.Header("group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire")
+
+	n := time.Now()
+	for _, p := range properties {
+		for _, h := range p.Hosts {
+			ci := h.Clientinfo
+			csvx.Write(
+				p.Groupname,
+				p.Propertyname,
+				h.Hostname,
+				h.Edgehost,
+				ci.Cdn,
+				strings.Join(h.Clientinfo.Ips, " "),
+				ci.Subject,
+				ci.Issuer,
+				ci.Expire,
+			)
+
+			if hr.WarningDays != 0 && ci.Err == "" && ci.Cdn == "akamai" && n.After(ci.Expire.AddDate(0, 0, 0-hr.WarningDays)) {
+				fmt.Println("Host       :", ci.Hostname)
+				fmt.Println("Expire date:", ci.Expire)
+				fmt.Println("Subject    :", ci.Subject)
+				fmt.Println("Issuer     :", ci.Issuer)
+				diff := ci.Expire.Sub(n)
+				dura := durafmt.Parse(diff)
+				fmt.Println("Time left:", dura)
+			}
+		}
+
+	}
+}
+
+func Build(group string) (properties []*PropertyInfo) {
+	srvs := services.Services
 	properties = make([]*PropertyInfo, 0, 1000)
-	groupResponse, err := pr.PropService.PapiClient.GetGroups(context.Background())
+	groupResponse, err := srvs.Properties.PapiClient.GetGroups(context.Background())
 	if err != nil {
 		log.Fatalf("get groups %w", err)
 		return
@@ -137,9 +132,9 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 				ContractID: contractId,
 				GroupID:    grp.GroupID,
 			}
-			if pr.Group == "" || pr.Group == grp.GroupName {
+			if group == "" || group == grp.GroupName {
 
-				pl, err2 := pr.PropService.GetProperties(context.Background(), plrq)
+				pl, err2 := srvs.Properties.GetProperties(context.Background(), plrq)
 				if err2 != nil {
 					log.Errorf("get properties for group %s - %w", grp, err2)
 					continue
@@ -159,7 +154,7 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 							ValidateHostnames: false,
 							IncludeCertStatus: true,
 						}
-						hl, _ := pr.PropService.GetPropertyVersionHostnames(prhrq)
+						hl, _ := srvs.Properties.GetPropertyVersionHostnames(prhrq)
 
 						hll := len(hl.Hostnames.Items)
 						hostnames := make([]string, hll, hll)
@@ -170,7 +165,7 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 							hostinfo := &Hostinfo{
 								Hostname:   hiv.CnameFrom,
 								Edgehost:   hiv.CnameTo,
-								Clientinfo: clienttest.Testhost(hiv.CnameFrom),
+								Clientinfo: srvs.ClientTest.Testhost(hiv.CnameFrom),
 							}
 
 							hosts = append(hosts, hostinfo)
@@ -183,9 +178,9 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 							GroupID:         x.GroupID,
 							ValidateRules:   false,
 						}
-						pt := pr.PropService.GetRuleTree(prtrq)
+						pt := srvs.Properties.GetRuleTree(prtrq)
 
-						pb := pr.PropService.FindBehaviors(&pt.Rules)
+						pb := srvs.Properties.FindBehaviors(&pt.Rules)
 
 						siteshields, f := pb.Behaviors["siteShield"]
 						siteshield := ""
@@ -238,7 +233,7 @@ func (pr PropReport) Build() (properties []*PropertyInfo) {
 								}
 								pathmatch = strings.Trim(pathmatch, " ")
 
-								ips, _, err := pr.DnsService.DnsInfo(ohostname)
+								ips, _, err := srvs.Dns.DnsInfo(ohostname)
 								if err != nil {
 									log.Infof("dns %s: %w")
 								}

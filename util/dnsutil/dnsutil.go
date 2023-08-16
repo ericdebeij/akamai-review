@@ -1,4 +1,4 @@
-package akutil
+package dnsutil
 
 import (
 	"github.com/miekg/dns"

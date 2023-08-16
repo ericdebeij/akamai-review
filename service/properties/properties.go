@@ -1,4 +1,4 @@
-package aksv
+package properties
 
 import (
 	"context"
@@ -9,9 +9,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v3/pkg/papi"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/apex/log"
-	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
+	"github.com/ericdebeij/akamai-review/v3/util/osutil"
 )
 
 type Propsv struct {
@@ -23,7 +23,7 @@ type Propsv struct {
 func NewPropertyService(p papi.PAPI, cache string) (ps *Propsv) {
 	ps = &Propsv{
 		PapiClient:      p,
-		CacheDir:        akutil.ExpandPath(cache),
+		CacheDir:        osutil.ExpandPath(cache),
 		propertiesCache: make(map[papi.GetPropertiesRequest]*papi.GetPropertiesResponse),
 	}
 	return

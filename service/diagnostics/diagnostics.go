@@ -1,4 +1,4 @@
-package aksv
+package diagnostics
 
 import (
 	"bytes"
@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/session"
 	"github.com/apex/log"
-	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
+	"github.com/ericdebeij/akamai-review/v3/util/osutil"
 )
 
 type DiagnosticsService struct {
@@ -28,7 +28,7 @@ func NewDiagnosticsService(s session.Session, cacheFile string) (ds *Diagnostics
 		Session: s,
 	}
 
-	ds.CacheDir = akutil.ExpandPath(cacheFile)
+	ds.CacheDir = osutil.ExpandPath(cacheFile)
 	ds.ReadCache()
 
 	return

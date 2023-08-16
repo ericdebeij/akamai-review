@@ -1,18 +1,20 @@
-package aksv
+package clienttest
 
 import (
 	"strings"
 	"time"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/session"
 	"github.com/apex/log"
-	"github.com/ericdebeij/akamai-review/v2/internal/akutil"
+	"github.com/ericdebeij/akamai-review/v3/service/diagnostics"
+	"github.com/ericdebeij/akamai-review/v3/util/certutil"
+	"github.com/ericdebeij/akamai-review/v3/util/dnsutil"
 )
 
 type ClientTester struct {
 	EdgeSession session.Session
-	DnsService  *akutil.Dns
-	DiagService *DiagnosticsService
+	DnsService  *dnsutil.Dns
+	DiagService *diagnostics.DiagnosticsService
 	//Hosts       map[string]*ClientTest
 }
 
@@ -61,14 +63,16 @@ func (t *ClientTester) Testhost(hostname string) (info *ClientInfo) {
 		info.Cdn = "other"
 	}
 
-	certs, err := akutil.Loadcerts(hostname)
+	certs, err := certutil.Loadcerts(hostname)
 	if err != nil {
 		info.Err = err.Error()
 		return
 	}
 
-	info.Subject = certs[0].Subject.ToRDNSequence().String()
-	info.Issuer = certs[0].Issuer.ToRDNSequence().String()
+	//info.Subject = certs[0].Subject.ToRDNSequence().String()
+	info.Subject = certs[0].Subject.CommonName
+	//info.Issuer = certs[0].Issuer.ToRDNSequence().String()
+	info.Issuer = certs[0].Issuer.CommonName
 	info.Expire = certs[0].NotAfter
 
 	return

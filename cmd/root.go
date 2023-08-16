@@ -5,14 +5,14 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
-	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v2/pkg/session"
 	"github.com/apex/log"
+	"github.com/apex/log/handlers/text"
+	"github.com/ericdebeij/akamai-review/v3/services"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"github.com/ericdebeij/akamai-review/v2/internal/aksv"
 )
 
 const cfgDefaultFile = ".akamai-review.yaml"
@@ -28,7 +28,9 @@ your akamai account and perform checks on it that need to be performed
 on a regular base.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//Run: func(cmd *cobra.Command, args []string) { fmt.Println("hi") },
+	//Run: func(cmd *cobra.Command, args []string) {
+	//		fmt.Println("root command does not have a function of its own")
+	//	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -40,23 +42,53 @@ func Execute() {
 	}
 }
 
-func init() {
-
-	akamaiConfig = &aksv.EdgeConfig{}
-	viper.SetDefault("akamai.edgerc", "~/.edgerc")
-	viper.SetDefault("akamai.section", "default")
-	viper.SetDefault("resolver", "8.8.8.8:53")
-	viper.SetDefault("export", "export.csv")
-	viper.SetDefault("log.level", "INFO")
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")
-	rootCmd.PersistentFlags().StringVar(&akamaiConfig.Edgerc, "edgerc", "", "location of the credentials file")
-	rootCmd.PersistentFlags().StringVar(&akamaiConfig.Section, "section", "", "section of the credentials file")
-	rootCmd.PersistentFlags().StringVar(&akamaiConfig.AccountID, "account", "", "account switch key")
-	cobra.OnInitialize(initConfig)
+func Cleanup() {
+	closeLogFile()
 }
 
-var akamaiConfig *aksv.EdgeConfig
-var akamaiSession session.Session
+var logfile *os.File
+var loghandler *text.Handler
+
+func openLogFile(logFilePath string) (err error) {
+
+	if logFilePath == "" {
+		logfile = os.Stderr
+	} else {
+		logfile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	}
+	loghandler = text.New(logfile)
+	log.SetHandler(loghandler)
+	return err
+}
+
+func closeLogFile() {
+	if logfile != nil && logfile != os.Stderr && logfile != os.Stdout {
+		logfile.Close()
+	}
+}
+
+func param(cmd *cobra.Command, flag string, vip string, def interface{}, help string) {
+	switch def := def.(type) {
+	case string:
+		cmd.PersistentFlags().String(flag, def, help)
+	case int:
+		cmd.PersistentFlags().Int(flag, def, help)
+	default:
+		log.Fatalf("type for default value not yet supported %s %s", def)
+	}
+	viper.BindPFlag(vip, cmd.PersistentFlags().Lookup(flag))
+	viper.SetDefault(vip, def)
+}
+func init() {
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
+	for _, p := range services.Parameters {
+		param(rootCmd, p.Flag, p.Viber, p.Default, p.Help)
+	}
+
+	cobra.OnInitialize(initConfig)
+}
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
@@ -65,33 +97,18 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		log.SetLevelFromString(viper.GetString("log.level"))
+	err := viper.ReadInConfig()
+	openLogFile(viper.GetString("log.file"))
+	log.SetLevelFromString(viper.GetString("log.level"))
+	if err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
-	} else if !errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
-		log.Infof("error reading config file: %s error %w", viper.ConfigFileUsed(), err)
+	} else {
+		log.Debugf("confog file %v", err)
+
+		if errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
+			fmt.Fprintf(os.Stderr, "config file %s not found\n", viper.ConfigFileUsed())
+		}
 	}
 
-	openSession()
-}
-func openSession() {
-	if akamaiConfig.Edgerc == "" {
-		akamaiConfig.Edgerc = viper.GetString("akamai.edgerc")
-	}
-
-	if akamaiConfig.Section == "" {
-		akamaiConfig.Section = viper.GetString("akamai.section")
-	}
-
-	if akamaiConfig.AccountID == "" {
-		akamaiConfig.AccountID = viper.GetString("akamai.accountkey")
-	}
-
-	sess, err := aksv.NewSession(akamaiConfig)
-	if err != nil {
-		log.Errorf("session error %v", err)
-		os.Exit(1)
-	}
-
-	akamaiSession = sess
+	services.StartServices()
 }
