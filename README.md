@@ -20,6 +20,7 @@ This is sample software. As such this software comes with absolutely no warranty
 ```bash
 % akamai review
 ```
+or use the downloaded binary
 
 ## Usage
 ```bash
@@ -31,25 +32,33 @@ Usage:
   akamai-review [command]
 
 Available Commands:
-  alb                  Priving an overview of ALB configuration
-  certificates         Check your certificates
-  completion           Generate the autocompletion script for the specified shell
-  help                 Help about any command
-  properties           report on properties in the account
-  properties-host      report on hosts used in the properties in the account
-  properties-origin    report on origins used in the properties in the account
-  report               Run reports
-  usage-cpcode         Reports based on usage as part of the billing data
+  cpscertificates List certificates as defined in cps
+  help            Help about any command
+  pmhosts         List of all hostnames in your account per property
+  pmorigins       An overview of the origins
+  usagemonth      An overview of the usage for a month per cpcode and a comparison with the previous month
 
 Flags:
-      --account string   account switch key
-      --config string    config file with all default parameters (default ".akamai-review.yaml")
-      --edgerc string    location of the credentials file
-  -h, --help             help for akamai-review
-      --section string   section of the credentials file
+      --accountkey string   akamai account switch key
+      --cache string        cache folder (default ".akamai-cache")
+      --config string       config file with all default parameters (default ".akamai-review.yaml")
+      --edgerc string       akamai location of the credentials file (default "~/.edgerc")
+  -h, --help                help for akamai-review
+      --logfile string      logging output
+      --loglevel string     logging level (default "INFO")
+      --resolver string     resolver to be used (default "8.8.8.8:53")
+      --section string      akamai section of the credentials file (default "default")
+      --warningdays int     warning days for certificate issues (default 14)
 
-Use "akamai-review [command] --help" for more information about a command.
+Use "akamai-review [command] --help" for more information about a command. 
+
+This will show the individual flags for the commands
 ```
+## Config file
+A config file can be used for global parameters which are often used as well as for some default values of command specific parameters (like config and product).
+The default config name is .akamai-review.yaml, the file will be searched for in the current directory as well as in the users home directory.
+
+For an example of the config file, see the example directory.
 
 # Contribution
 
@@ -57,6 +66,6 @@ By submitting a contribution (the “Contribution”) to this project, and for g
 
 # Notice
 
-Copyright 2021 – Akamai Technologies, Inc.
+Copyright 2021-2023 – Akamai Technologies, Inc.
  
 All works contained in this repository, excepting those explicitly otherwise labeled, are the property of Akamai Technologies, Inc.
