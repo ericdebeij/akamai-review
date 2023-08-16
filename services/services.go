@@ -104,7 +104,7 @@ func init() {
 	addparam("section", "akamai.section", "default", "akamai section of the credentials file")
 	addparam("accountkey", "akamai.accountkey", "", "akamai account switch key")
 	addparam("resolver", "dns.resolver", "8.8.8.8:53", "resolver to be used")
-	addparam("cache", "akamai.cache", ".akamai-cache", "cache folder")
+	addparam("cache", "akamai.cache", "~/.akamai-cache", "cache folder")
 	addparam("loglevel", "log.level", "INFO", "logging level")
 	addparam("logfile", "log.file", "", "logging output")
 	addparam("warningdays", "certificate.warningdays", 14, "warning days for certificate issues")

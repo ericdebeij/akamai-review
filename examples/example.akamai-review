@@ -1,0 +1,11 @@
+akamai:
+  edgerc: ~/.edgerc
+  section: default
+  accountkey: ""
+  cache: ~/.akamai-cache
+default:
+  contract: ""
+  product: ""
+log:
+  level: DEBUG
+  file: debug.log
