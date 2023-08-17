@@ -11,7 +11,7 @@ import (
 
 // originlistCmd represents the originlist command
 var pmoriginsCmd = &cobra.Command{
-	Use:   "pmorigins",
+	Use:   "pm-origins",
 	Short: "An overview of the origins",
 	Long: `An overview of the properties and the origins used within the property. In order to find this information the property manager rules are downloaded (and stored in a cache).
 At a high level the property match criteria are extracted from the config file. (Only a limited number of conditions are shown). 

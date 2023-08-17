@@ -3,6 +3,7 @@ package services
 import (
 	"os"
 
+	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/appsec"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/cps"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/papi"
 	"github.com/akamai/AkamaiOPEN-edgegrid-golang/v7/pkg/session"
@@ -28,6 +29,7 @@ type TheServices struct {
 	Dns               *dnsutil.Dns
 	PapiClient        papi.PAPI
 	Properties        *properties.Propsv
+	SecClient         appsec.APPSEC
 }
 
 var Services = TheServices{}
@@ -78,6 +80,9 @@ func StartServices() {
 
 	propsv := properties.NewPropertyService(papiClient, pstr("akamai.cache"))
 	Services.Properties = propsv
+
+	secClient := appsec.Client(sess)
+	Services.SecClient = secClient
 }
 
 type TheParameter struct {

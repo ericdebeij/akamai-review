@@ -40,6 +40,7 @@ type IsAkamaiIpResponse struct {
 
 func (ds *DiagnosticsService) ReadCache() {
 	jsonFile, err := os.Open(ds.CacheDir + "/diagiscdn.json")
+
 	if err == nil {
 		defer jsonFile.Close()
 		byteValue, _ := io.ReadAll(jsonFile)
@@ -52,11 +53,14 @@ func (ds *DiagnosticsService) ReadCache() {
 }
 
 func (ds *DiagnosticsService) FlushCache() {
+
+	fmt.Println("dirty cach")
 	if ds.dirty {
 		byteblob, err := json.Marshal(ds.IpCache)
 		if err != nil {
 			fmt.Println(err)
 		}
+		fmt.Println("check", filepath.Dir(ds.CacheDir+"/diagiscdn.json"))
 		os.MkdirAll(filepath.Dir(ds.CacheDir+"/diagiscdn.json"), 0750)
 		err = os.WriteFile(ds.CacheDir+"/diagiscdn.json", byteblob, 0644)
 		if err != nil {

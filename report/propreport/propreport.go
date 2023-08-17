@@ -10,6 +10,7 @@ import (
 	"github.com/apex/log"
 	"github.com/ericdebeij/akamai-review/v3/exportx"
 	"github.com/ericdebeij/akamai-review/v3/service/clienttest"
+	"github.com/ericdebeij/akamai-review/v3/service/properties"
 	"github.com/ericdebeij/akamai-review/v3/services"
 	"github.com/hako/durafmt"
 )
@@ -25,12 +26,18 @@ type OriginReport struct {
 	Group  string
 }
 
+type PropertyReport struct {
+	Export string
+	Group  string
+}
+
 type PropertyInfo struct {
 	Groupname    string
 	Propertyname string
 	Siteshield   string
 	Hosts        []*Hostinfo
 	Origins      []*OriginInfo
+	Behaviors    *properties.PropSum
 }
 
 type Hostinfo struct {
@@ -256,6 +263,7 @@ func Build(group string) (properties []*PropertyInfo) {
 							Siteshield:   siteshield,
 							Origins:      origins,
 							Hosts:        hosts,
+							Behaviors:    pb,
 						}
 						properties = append(properties, propinfo)
 					}
@@ -263,6 +271,5 @@ func Build(group string) (properties []*PropertyInfo) {
 			}
 		}
 	}
-
 	return
 }

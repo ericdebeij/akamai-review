@@ -1,6 +1,8 @@
 package clienttest
 
 import (
+	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -28,6 +30,40 @@ type ClientInfo struct {
 	Issuer   string
 	Expire   time.Time
 	//Iscovered string
+}
+
+func (t *ClientTester) TestHttp(url string) (info string) {
+
+	client := &http.Client{
+		Timeout: time.Second * 4,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		log.Debugf("http test", url, err)
+		info = "error"
+		return
+	}
+
+	loc5 := ""
+	if resp.StatusCode == 301 || resp.StatusCode == 302 {
+		location := resp.Header.Get("Location")
+		loc5 = location[:5]
+	}
+
+	bywho := ""
+	srv := resp.Header.Get("Server")
+	if srv == "AkamaiGHost" {
+		bywho = "akamai"
+	} else if srv != "" {
+		bywho = "origin"
+	}
+	info = fmt.Sprintf("%v-%v-%v", resp.StatusCode, loc5, bywho)
+	log.Debugf("http test", url, resp.StatusCode, resp.Header.Get("Location"), resp.Header.Get("Server"))
+	return
 }
 
 func (t *ClientTester) Testhost(hostname string) (info *ClientInfo) {

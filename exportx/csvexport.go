@@ -43,7 +43,11 @@ func (csvx *CsvExport) Write(p ...interface{}) {
 			ar[i] = x
 		default:
 			s := fmt.Sprint(x)
-			ar[i] = s
+			if s != "0" && s != "0.0" && s != "0001-01-01 00:00:00 +0000 UTC" && s != "[]" {
+				ar[i] = s
+			} else {
+				ar[i] = ""
+			}
 		}
 	}
 	csvx.csvwriter.Write(ar)

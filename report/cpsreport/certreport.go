@@ -1,4 +1,4 @@
-package certreport
+package cpsreport
 
 import (
 	"context"
