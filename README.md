@@ -24,7 +24,7 @@ or use the downloaded binary
 
 ## Usage
 ```bash
-% akamai-review is a utility collection to extract information from
+akamai-review is a utility collection to extract information from
 your akamai account and perform checks on it that need to be performed
 on a regular base.
 
@@ -32,15 +32,16 @@ Usage:
   akamai-review [command]
 
 Available Commands:
-  cpscertificates List certificates as defined in cps
-  help            Help about any command
-  pmhosts         List of all hostnames in your account per property
-  pmorigins       An overview of the origins
-  usagemonth      An overview of the usage for a month per cpcode and a comparison with the previous month
+  cps-certificates  List certificates as defined in cps
+  help              Help about any command
+  hosts-certificate List of all hostnames in your account per property with dns and certificate information
+  pm-hosts          List of all hostnames in your account per property with dns and certificate information
+  pm-origins        An overview of the origins
+  usage-cpcode      An overview of the usage for a month per cpcode and a comparison with the previous month
 
 Flags:
       --accountkey string   akamai account switch key
-      --cache string        cache folder (default ".akamai-cache")
+      --cache string        cache folder (default "~/.akamai-cache")
       --config string       config file with all default parameters (default ".akamai-review.yaml")
       --edgerc string       akamai location of the credentials file (default "~/.edgerc")
   -h, --help                help for akamai-review
@@ -50,9 +51,7 @@ Flags:
       --section string      akamai section of the credentials file (default "default")
       --warningdays int     warning days for certificate issues (default 14)
 
-Use "akamai-review [command] --help" for more information about a command. 
-
-This will show the individual flags for the commands
+Use "akamai-review [command] --help" for more information about a command.
 ```
 ## Config file
 A config file can be used for global parameters which are often used as well as for some default values of command specific parameters (like config and product).
