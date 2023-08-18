@@ -24,7 +24,7 @@ type SecHostReport struct {
 }
 
 func (hr *SecHostReport) Report() {
-	log.Debugf("hostreport started", hr)
+	log.Infof("hosts-certificate %+v", hr)
 	srvs := services.Services
 	// skip failover hosts and only .com hosts: `^(?!fail).*\.com$`
 	var matchre, skipre *regexp.Regexp

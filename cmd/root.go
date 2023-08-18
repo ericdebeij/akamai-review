@@ -97,6 +97,23 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
+func viperAlias(base, key string) string {
+	c := viper.GetString(base + "." + key)
+	if c == "" {
+		c = viper.GetString("default." + key)
+	}
+	if c == "" {
+		return ""
+	}
+
+	alias := viper.GetStringMapString("alias." + key)
+	v, f := alias[c]
+	if f {
+		return v
+	}
+	return c
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 
@@ -109,7 +126,7 @@ func initConfig() {
 		}
 	}
 	viper.SetConfigFile(cfgFile)
-
+	viper.SetEnvPrefix("AK_REVIEW")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
@@ -120,7 +137,7 @@ func initConfig() {
 	if err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	} else {
-		log.Debugf("confog file %v", err)
+		log.Infof("confog file %v", err)
 		if errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
 			fmt.Fprintf(os.Stderr, "config file %s not found\n", viper.ConfigFileUsed())
 		}

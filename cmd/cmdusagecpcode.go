@@ -15,9 +15,9 @@ var usageCmd = &cobra.Command{
 	Short: "An overview of the usage for a month per cpcode and a comparison with the previous month",
 	Long:  `Uses the billing API to get an overview of the usage for a specific month and compares this with the previous month, both bytes and hits`,
 	Run: func(cmd *cobra.Command, args []string) {
-		um := &usagereport.UsageMonth{
-			Contract: viper.GetString("usage-cpcode.contract"),
-			Product:  viper.GetString("usage-cpcode.product"),
+		um := &usagereport.UsageCpcode{
+			Contract: viperAlias("usage-cpcode", "contract"),
+			Product:  viperAlias("usage-cpcode", "product"),
 			Period:   viper.GetString("usage-cpcode.period"),
 			Export:   viper.GetString("usage-cpcode.export"),
 		}

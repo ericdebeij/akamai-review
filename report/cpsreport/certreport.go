@@ -16,6 +16,10 @@ type CertReport struct {
 }
 
 func (cr *CertReport) Report() {
+	log.Infof("cps-certificates %+v", cr)
+	if cr.Contract == "" {
+		log.Fatal("contract is a mandatory parameter")
+	}
 	srvs := services.Services
 	listenrollreq := cps.ListEnrollmentsRequest{
 		ContractID: cr.Contract,

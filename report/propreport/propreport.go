@@ -62,6 +62,7 @@ type OriginInfo struct {
 }
 
 func (br BehaviorReport) Report() {
+	log.Infof("pm-behavior %+v", br)
 	csvx, err := exportx.Create(br.Export)
 	if err != nil {
 		log.Fatalf("failed to open file %w", err)
@@ -107,6 +108,7 @@ func (br BehaviorReport) Report() {
 	}
 }
 func (or OriginReport) Report() {
+	log.Infof("upm-origins %+v", or)
 	csvx, err := exportx.Create(or.Export)
 	if err != nil {
 		log.Fatalf("failed to open file %w", err)
@@ -135,6 +137,7 @@ func (or OriginReport) Report() {
 	}
 }
 func (hr HostReport) Report() {
+	log.Infof("pm-hosts %+v", hr)
 	srvs := services.Services
 	csvx, err := exportx.Create(hr.Export)
 	if err != nil {
@@ -188,7 +191,7 @@ func (hr HostReport) Report() {
 }
 
 func Build(group string, property string) (properties []*PropertyInfo) {
-	log.Infof("Buildup property info, filter: group %s, property %s", group, property)
+	log.Infof("Buildup property info, filter: group:%v property:%v", group, property)
 	srvs := services.Services
 	properties = make([]*PropertyInfo, 0, 1000)
 	groupResponse, err := srvs.Properties.PapiClient.GetGroups(context.Background())

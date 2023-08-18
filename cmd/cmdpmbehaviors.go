@@ -17,7 +17,7 @@ var pmbehaviorsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		or := &propreport.BehaviorReport{
 			Export:   viper.GetString("pm-behaviors.export"),
-			Group:    viper.GetString("pm-behaviors.group"),
+			Group:    viperAlias("pm-behaviors", "group"),
 			Property: viper.GetString("pm-behaviors.property"),
 			Behavior: viper.GetString("pm-behaviors.behavior"),
 		}

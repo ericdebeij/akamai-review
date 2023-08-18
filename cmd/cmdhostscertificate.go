@@ -19,8 +19,8 @@ The related edgehost is shown and the host is checked to see if it is actually s
 		hr := &securityreport.SecHostReport{
 			Export:      viper.GetString("hosts-certificate.export"),
 			WarningDays: viper.GetInt("warningdays"),
-			Match:       viper.GetString("hosts-certificate.hostmatch"),
-			Skip:        viper.GetString("hosts-certificate.hostskip"),
+			Match:       viperAlias("hosts-certificate", "hostmatch"),
+			Skip:        viperAlias("hosts-certificate", "hostskip"),
 			HttpTest:    viper.GetBool("hosts-certificate.httptest"),
 		}
 		hr.Report()
@@ -29,9 +29,8 @@ The related edgehost is shown and the host is checked to see if it is actually s
 
 func init() {
 	param(hostscertCmd, "export", "hosts-certificate.export", "hosts-certificate.csv", "name of the exportfile")
-	param(hostscertCmd, "group", "hosts-certificate.group", "", "filter for the group")
 	param(hostscertCmd, "match", "hosts-certificate.hostmatch", "", "regular expression for hostmatch")
-	param(hostscertCmd, "skip", "hosts-certificate.hostskip", "", "regular expression for hostskip")
+	param(hostscertCmd, "skip", "hosts-certificate.hostskip", "^failover\\..*$", "regular expression for hostskip")
 	param(hostscertCmd, "httptest", "hosts-certificate.httptest", false, "run an http test to check if http->https redirect is implemented")
 	rootCmd.AddCommand(hostscertCmd)
 }

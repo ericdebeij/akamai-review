@@ -19,7 +19,7 @@ For an origin the type of origin (web,ns), forward host header and ip-address is
 	Run: func(cmd *cobra.Command, args []string) {
 		or := &propreport.OriginReport{
 			Export: viper.GetString("pm-origins.export"),
-			Group:  viper.GetString("pm-origins.group"),
+			Group:  viperAlias("pm-origins", "group"),
 		}
 		or.Report()
 	},

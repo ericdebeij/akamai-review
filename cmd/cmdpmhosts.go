@@ -18,7 +18,7 @@ The related edgehost is shown and the host is checked to see if it is actually s
 	Run: func(cmd *cobra.Command, args []string) {
 		hr := &propreport.HostReport{
 			Export:      viper.GetString("pm-hosts.export"),
-			Group:       viper.GetString("pm-hosts.group"),
+			Group:       viperAlias("pm-hosts", "group"),
 			Property:    viper.GetString("pm-hosts.property"),
 			WarningDays: viper.GetInt("warningdays"),
 			HttpTest:    viper.GetBool("pm-hosts.httptest"),

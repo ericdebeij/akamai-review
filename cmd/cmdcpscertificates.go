@@ -4,8 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ericdebeij/akamai-review/v3/report/cpsreport"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,9 +15,8 @@ var cpscertificatesCmd = &cobra.Command{
 	Short: "List certificates as defined in cps",
 	Long:  `List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(viper.GetString("contract"))
 		cr := &cpsreport.CertReport{
-			Contract: viper.GetString("cps-certificates.contract"),
+			Contract: viperAlias("cps-certificates", "contract"),
 			Export:   viper.GetString("cps-certificates.export"),
 		}
 

@@ -3,9 +3,21 @@ akamai:
   section: default
   accountkey: ""
   cache: ~/.akamai-cache
+log:
+  level: INFO
+  file: ""
 default:
   contract: ""
   product: ""
-log:
-  level: DEBUG
-  file: debug.log
+  group: ""
+alias:
+  contract:
+    ksd: ""
+    dsa: ""
+    amd: ""
+    dd: ""
+  product:
+    ksd: "M-LC-162045"
+    dsa: "M-LC-14518"
+    amd: "M-LC-118405"
+    dd: "M-LC-122937"

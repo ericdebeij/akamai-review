@@ -14,7 +14,7 @@ import (
 	"github.com/ericdebeij/akamai-review/v3/services"
 )
 
-type UsageMonth struct {
+type UsageCpcode struct {
 	Contract string
 	Product  string
 	Period   string
@@ -28,7 +28,8 @@ type r struct {
 	currentHits  float64
 }
 
-func (ur UsageMonth) Report() {
+func (ur UsageCpcode) Report() {
+	log.Infof("usage-cpcode %+v", ur)
 	srvs := services.Services
 	if ur.Contract == "" || ur.Product == "" {
 		log.Fatalf("Contract and Product are mandatory parameters for usage-cpcode")
