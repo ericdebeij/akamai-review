@@ -5,7 +5,7 @@ This is sample software, will likely remain in draft state forever and there is 
 
 ## Akamai CLI Install
 ```bash
-%  akamai install https://github.com/ericdebeij/akamai-review
+%  akamai install ericdebeij/akamai-review
 ```
 
 or just download the binary for your operating system from the release folder and use directly.
