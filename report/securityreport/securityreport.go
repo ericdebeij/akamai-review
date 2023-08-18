@@ -3,6 +3,7 @@ package securityreport
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -44,17 +45,24 @@ func (hr *SecHostReport) Report() {
 	csvx, err := exportx.Create(hr.Export)
 	if err != nil {
 		log.Fatalf("export file %v", err)
+		os.Exit(1)
 	}
 	defer csvx.Close()
-	csvx.Header("host", "cdn", "security", "subject-cn", "issuer-cn", "expires", "expire-days", "http-https")
-
+	if hr.HttpTest {
+		csvx.Header("host", "cdn", "security", "subject-cn", "issuer-cn", "expires", "expire-days", "http-https")
+	} else {
+		csvx.Header("host", "cdn", "security", "subject-cn", "issuer-cn", "expires", "expire-days")
+	}
 	nu := time.Now()
 	for _, ch := range x.HostnameCoverage {
 		hn := strings.ToLower(ch.Hostname)
+		//fmt.Print(hn)
 		if (skipre != nil && skipre.MatchString(hn)) || (matchre != nil && !matchre.MatchString(hn)) {
+			//fmt.Println("..skip")
 			continue
 		}
 
+		//fmt.Print("..test")
 		testresult := srvs.ClientTest.Testhost(hn)
 		expiredays := 0
 		httptest := ""
@@ -62,13 +70,15 @@ func (hr *SecHostReport) Report() {
 		if testresult.Subject != "" {
 			expiredays = int(testresult.Expire.Sub(nu).Hours() / 24)
 		}
-		if len(testresult.Ips) > 0 && hr.HttpTest {
-			httptest = srvs.ClientTest.TestHttp("http://" + hn + "/")
+		if hr.HttpTest {
+			if len(testresult.Ips) > 0 {
+				//fmt.Print("..httptest..")
+				httptest = srvs.ClientTest.TestHttp("http://" + hn + "/")
+			}
 			csvx.Write(testresult.Hostname, testresult.Cdn, ch.PolicyNames, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays, httptest)
 		} else {
 			csvx.Write(testresult.Hostname, testresult.Cdn, ch.PolicyNames, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays)
 		}
-
 		if testresult.Err == "" && testresult.Cdn == "akamai" && nu.After(testresult.Expire.AddDate(0, 0, 0-hr.WarningDays)) {
 			fmt.Println("Host       :", testresult.Hostname)
 			fmt.Println("Expire date:", testresult.Expire)
@@ -78,5 +88,6 @@ func (hr *SecHostReport) Report() {
 			dura := durafmt.Parse(diff)
 			fmt.Println("Time left:", dura)
 		}
+		//fmt.Println("ready")
 	}
 }

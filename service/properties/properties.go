@@ -84,6 +84,7 @@ func walkTree(psum *PropSum, r *papi.Rules, c [][]papi.RuleBehavior) {
 		if !f {
 			pb = make([]UsedBehavior, 0, 10)
 		}
+
 		u := UsedBehavior{
 			Behavior: &r.Behaviors[i],
 			Criteria: c,

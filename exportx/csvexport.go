@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/apex/log"
 )
@@ -11,13 +12,14 @@ import (
 type CsvExport struct {
 	filehandle *os.File
 	csvwriter  *csv.Writer
+	headers    []string
 }
 
 func Create(export string) (csvx *CsvExport, err error) {
 	csvx = &CsvExport{}
 	csvx.filehandle, err = os.Create(export)
 	if err != nil {
-		log.Fatalf("failed to open file %s, %v", export, err)
+		log.Fatalf("csvx - failed to create file %s, %v", export, err)
 	}
 	csvx.csvwriter = csv.NewWriter(csvx.filehandle)
 	return
@@ -32,6 +34,7 @@ func (csvx *CsvExport) Close() {
 	}
 }
 func (csvx *CsvExport) Header(h ...string) {
+	csvx.headers = h
 	csvx.csvwriter.Write(h)
 }
 
@@ -42,13 +45,18 @@ func (csvx *CsvExport) Write(p ...interface{}) {
 		case string:
 			ar[i] = x
 		default:
+			// The default are handled quick and dirty as you can see
 			s := fmt.Sprint(x)
+			s = strings.TrimPrefix(s, "map")
 			if s != "0" && s != "0.0" && s != "0001-01-01 00:00:00 +0000 UTC" && s != "[]" {
 				ar[i] = s
 			} else {
 				ar[i] = ""
 			}
 		}
+	}
+	if len(ar) > len(csvx.headers) {
+		ar = ar[:len(csvx.headers)]
 	}
 	csvx.csvwriter.Write(ar)
 }

@@ -17,21 +17,21 @@ var hostscertCmd = &cobra.Command{
 The related edgehost is shown and the host is checked to see if it is actually served by Akamai, resolves in a proper IP-address and information regarding the certificate being used`,
 	Run: func(cmd *cobra.Command, args []string) {
 		hr := &securityreport.SecHostReport{
-			Export:      viper.GetString("security.hostexport"),
+			Export:      viper.GetString("hosts-certificate.export"),
 			WarningDays: viper.GetInt("warningdays"),
-			Match:       viper.GetString("hostmatch"),
-			Skip:        viper.GetString("hostskip"),
-			HttpTest:    viper.GetBool("httptest"),
+			Match:       viper.GetString("hosts-certificate.hostmatch"),
+			Skip:        viper.GetString("hosts-certificate.hostskip"),
+			HttpTest:    viper.GetBool("hosts-certificate.httptest"),
 		}
 		hr.Report()
 	},
 }
 
 func init() {
-	param(hostscertCmd, "export", "security.hostexport", "hosts.csv", "name of the exportfile")
-	param(hostscertCmd, "group", "group", "", "filter for the group")
-	param(hostscertCmd, "match", "hostmatch", "", "regular expression for hostmatch")
-	param(hostscertCmd, "skip", "hostskip", "", "regular expression for hostskip")
-	param(hostscertCmd, "httptest", "httptest", false, "run an http test to check if http->https redirect is implemented")
+	param(hostscertCmd, "export", "hosts-certificate.export", "hosts-certificate.csv", "name of the exportfile")
+	param(hostscertCmd, "group", "hosts-certificate.group", "", "filter for the group")
+	param(hostscertCmd, "match", "hosts-certificate.hostmatch", "", "regular expression for hostmatch")
+	param(hostscertCmd, "skip", "hosts-certificate.hostskip", "", "regular expression for hostskip")
+	param(hostscertCmd, "httptest", "hosts-certificate.httptest", false, "run an http test to check if http->https redirect is implemented")
 	rootCmd.AddCommand(hostscertCmd)
 }

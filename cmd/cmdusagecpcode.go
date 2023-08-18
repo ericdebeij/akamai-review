@@ -16,19 +16,19 @@ var usageCmd = &cobra.Command{
 	Long:  `Uses the billing API to get an overview of the usage for a specific month and compares this with the previous month, both bytes and hits`,
 	Run: func(cmd *cobra.Command, args []string) {
 		um := &usagereport.UsageMonth{
-			Contract: viper.GetString("default.contract"),
-			Product:  viper.GetString("default.product"),
-			Period:   viper.GetString("Period"),
-			Export:   viper.GetString("usage.month"),
+			Contract: viper.GetString("usage-cpcode.contract"),
+			Product:  viper.GetString("usage-cpcode.product"),
+			Period:   viper.GetString("usage-cpcode.period"),
+			Export:   viper.GetString("usage-cpcode.export"),
 		}
 		um.Report()
 	},
 }
 
 func init() {
-	param(usageCmd, "export", "usage.month", "usage_PERIOD.csv", "name of the exportfile")
-	param(usageCmd, "contract", "default.contract", "", "contract to be used")
-	param(usageCmd, "period", "period", "", "period to be investigated")
-	param(usageCmd, "product", "default.product", "", "product code to be used")
+	param(usageCmd, "export", "usage-cpcode.export", "usage_PERIOD.csv", "name of the exportfile")
+	param(usageCmd, "contract", "usage-cpcode.contract", "", "contract to be used")
+	param(usageCmd, "period", "usage-cpcode.period", "", "period to be investigated")
+	param(usageCmd, "product", "usage-cpcode.product", "", "product code to be used")
 	rootCmd.AddCommand(usageCmd)
 }

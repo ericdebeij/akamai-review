@@ -71,15 +71,20 @@ func param(cmd *cobra.Command, flag string, vip string, def interface{}, help st
 	switch def := def.(type) {
 	case string:
 		cmd.PersistentFlags().String(flag, def, help)
+		if def != "" {
+			viper.SetDefault(vip, def)
+		}
 	case int:
 		cmd.PersistentFlags().Int(flag, def, help)
+		if def != 0 {
+			viper.SetDefault(vip, def)
+		}
 	case bool:
 		cmd.PersistentFlags().Bool(flag, def, help)
 	default:
 		log.Fatalf("type for default value not yet supported %s", def)
 	}
 	viper.BindPFlag(vip, cmd.PersistentFlags().Lookup(flag))
-	viper.SetDefault(vip, def)
 }
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")

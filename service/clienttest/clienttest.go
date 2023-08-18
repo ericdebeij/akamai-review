@@ -67,6 +67,7 @@ func (t *ClientTester) TestHttp(url string) (info string) {
 }
 
 func (t *ClientTester) Testhost(hostname string) (info *ClientInfo) {
+	log.Debugf("Test host: %s", hostname)
 	info = &ClientInfo{
 		Hostname: hostname,
 	}
@@ -100,6 +101,7 @@ func (t *ClientTester) Testhost(hostname string) (info *ClientInfo) {
 	}
 
 	certs, err := certutil.Loadcerts(hostname)
+	log.Debugf("Certificates loaded for hostname %s: %v", hostname, err)
 	if err != nil {
 		info.Err = err.Error()
 		return

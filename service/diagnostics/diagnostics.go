@@ -20,7 +20,7 @@ type DiagnosticsService struct {
 	Response *http.Response
 	CacheDir string
 	IpCache  map[string]bool
-	dirty    bool
+	dirty    int
 }
 
 func NewDiagnosticsService(s session.Session, cacheFile string) (ds *DiagnosticsService) {
@@ -49,25 +49,22 @@ func (ds *DiagnosticsService) ReadCache() {
 	} else {
 		ds.IpCache = make(map[string]bool, 100)
 	}
-	ds.dirty = false
+	ds.dirty = 0
 }
 
 func (ds *DiagnosticsService) FlushCache() {
 
-	fmt.Println("dirty cach")
-	if ds.dirty {
+	if ds.dirty > 0 {
 		byteblob, err := json.Marshal(ds.IpCache)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println("check", filepath.Dir(ds.CacheDir+"/diagiscdn.json"))
 		os.MkdirAll(filepath.Dir(ds.CacheDir+"/diagiscdn.json"), 0750)
 		err = os.WriteFile(ds.CacheDir+"/diagiscdn.json", byteblob, 0644)
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		ds.dirty = false
+		ds.dirty = 0
 	}
 }
 
@@ -142,7 +139,10 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 				if rip.IsEdgeIP {
 					is = is + 1
 				}
-				ds.dirty = true
+				ds.dirty += 1
+			}
+			if ds.dirty > 5 {
+				ds.FlushCache()
 			}
 			return
 		}

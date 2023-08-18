@@ -19,8 +19,8 @@ var cpscertificatesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(viper.GetString("contract"))
 		cr := &cpsreport.CertReport{
-			Contract: viper.GetString("default.contract"),
-			Export:   viper.GetString("cps.certificates"),
+			Contract: viper.GetString("cps-certificates.contract"),
+			Export:   viper.GetString("cps-certificates.export"),
 		}
 
 		cr.Report()
@@ -28,7 +28,7 @@ var cpscertificatesCmd = &cobra.Command{
 }
 
 func init() {
-	param(cpscertificatesCmd, "export", "cps.certificates", "cpscertificates.csv", "contract to be used")
-	param(cpscertificatesCmd, "contract", "default.contract", "", "contract to be used")
+	param(cpscertificatesCmd, "export", "cps-certificates.export", "cps-certificates.csv", "contract to be used")
+	param(cpscertificatesCmd, "contract", "cps-certificates.contract", "", "contract to be used")
 	rootCmd.AddCommand(cpscertificatesCmd)
 }

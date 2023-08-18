@@ -17,16 +17,20 @@ var pmhostsCmd = &cobra.Command{
 The related edgehost is shown and the host is checked to see if it is actually served by Akamai, resolves in a proper IP-address and information regarding the certificate being used`,
 	Run: func(cmd *cobra.Command, args []string) {
 		hr := &propreport.HostReport{
-			Export:      viper.GetString("properties.hosts"),
-			Group:       viper.GetString("group"),
+			Export:      viper.GetString("pm-hosts.export"),
+			Group:       viper.GetString("pm-hosts.group"),
+			Property:    viper.GetString("pm-hosts.property"),
 			WarningDays: viper.GetInt("warningdays"),
+			HttpTest:    viper.GetBool("pm-hosts.httptest"),
 		}
 		hr.Report()
 	},
 }
 
 func init() {
-	param(pmhostsCmd, "export", "properties.hosts", "pmhosts.csv", "name of the exportfile")
-	param(pmhostsCmd, "group", "group", "", "filter for the group")
+	param(pmhostsCmd, "export", "pm-hosts.export", "pm-hosts.csv", "name of the exportfile")
+	param(pmhostsCmd, "group", "pm-hosts.group", "", "filter for the group")
+	param(pmhostsCmd, "property", "pm-hosts.property", "", "filter for the property")
+	param(pmhostsCmd, "httptest", "pm-hosts.httptest", false, "run a test to check http->https redirects")
 	rootCmd.AddCommand(pmhostsCmd)
 }

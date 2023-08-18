@@ -18,15 +18,15 @@ At a high level the property match criteria are extracted from the config file. 
 For an origin the type of origin (web,ns), forward host header and ip-address is shown (not possible for variable origins)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		or := &propreport.OriginReport{
-			Export: viper.GetString("properties.origins"),
-			Group:  viper.GetString("group"),
+			Export: viper.GetString("pm-origins.export"),
+			Group:  viper.GetString("pm-origins.group"),
 		}
 		or.Report()
 	},
 }
 
 func init() {
-	param(pmoriginsCmd, "export", "properties.origins", "origins.csv", "name of the exportfile")
-	param(pmoriginsCmd, "group", "group", "", "filter for the group")
+	param(pmoriginsCmd, "export", "pm-origins.export", "pm-origins.csv", "name of the exportfile")
+	param(pmoriginsCmd, "group", "pm-origins.group", "", "filter for the group")
 	rootCmd.AddCommand(pmoriginsCmd)
 }

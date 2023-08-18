@@ -18,17 +18,23 @@ import (
 type HostReport struct {
 	Export      string
 	Group       string
+	Property    string
 	WarningDays int
+	HttpTest    bool
 }
 
 type OriginReport struct {
-	Export string
-	Group  string
+	Export   string
+	Group    string
+	Property string
 }
 
-type PropertyReport struct {
-	Export string
-	Group  string
+type BehaviorReport struct {
+	Export   string
+	Group    string
+	Property string
+	Behavior string
+	Criteria bool
 }
 
 type PropertyInfo struct {
@@ -37,7 +43,7 @@ type PropertyInfo struct {
 	Siteshield   string
 	Hosts        []*Hostinfo
 	Origins      []*OriginInfo
-	Behaviors    *properties.PropSum
+	Summary      *properties.PropSum
 }
 
 type Hostinfo struct {
@@ -55,6 +61,51 @@ type OriginInfo struct {
 	Ips        []string
 }
 
+func (br BehaviorReport) Report() {
+	csvx, err := exportx.Create(br.Export)
+	if err != nil {
+		log.Fatalf("failed to open file %w", err)
+	}
+	defer csvx.Close()
+
+	properties := Build(br.Group, br.Property)
+
+	if br.Behavior == "" {
+		csvx.Header("group", "property", "behaviors")
+		for _, p := range properties {
+			ba := make([]string, 0, 100)
+			for k, b := range p.Summary.Behaviors {
+				ki := fmt.Sprintf("%s(%d)", k, len(b))
+				ba = append(ba, ki)
+			}
+
+			csvx.Write(p.Groupname, p.Propertyname, ba)
+		}
+	} else {
+
+		if br.Criteria {
+			csvx.Header("group", "property", br.Behavior, "Criteria")
+
+		} else {
+			csvx.Header("group", "property", br.Behavior)
+
+		}
+
+		for _, p := range properties {
+			b := p.Summary.Behaviors[br.Behavior]
+			if len(b) == 0 {
+				csvx.Write(p.Groupname, p.Propertyname, "not used")
+			}
+			for _, bi := range b {
+				if br.Criteria {
+					csvx.Write(p.Groupname, p.Propertyname, bi.Behavior.Options, bi.Criteria)
+				} else {
+					csvx.Write(p.Groupname, p.Propertyname, bi.Behavior.Options)
+				}
+			}
+		}
+	}
+}
 func (or OriginReport) Report() {
 	csvx, err := exportx.Create(or.Export)
 	if err != nil {
@@ -62,7 +113,7 @@ func (or OriginReport) Report() {
 	}
 	defer csvx.Close()
 
-	properties := Build(or.Group)
+	properties := Build(or.Group, or.Property)
 
 	csvx.Header("group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips")
 
@@ -84,20 +135,31 @@ func (or OriginReport) Report() {
 	}
 }
 func (hr HostReport) Report() {
+	srvs := services.Services
 	csvx, err := exportx.Create(hr.Export)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer csvx.Close()
 
-	properties := Build(hr.Group)
+	properties := Build(hr.Group, hr.Property)
 
-	csvx.Header("group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire")
+	if hr.HttpTest {
+		csvx.Header("group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire", "httptest")
+	} else {
+		csvx.Header("group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire")
+	}
 
 	n := time.Now()
 	for _, p := range properties {
 		for _, h := range p.Hosts {
 			ci := h.Clientinfo
+
+			httptest := ""
+			if hr.HttpTest && len(h.Clientinfo.Ips) > 0 {
+				httptest = srvs.ClientTest.TestHttp("http://" + h.Hostname + "/")
+			}
+
 			csvx.Write(
 				p.Groupname,
 				p.Propertyname,
@@ -108,6 +170,7 @@ func (hr HostReport) Report() {
 				ci.Subject,
 				ci.Issuer,
 				ci.Expire,
+				httptest,
 			)
 
 			if hr.WarningDays != 0 && ci.Err == "" && ci.Cdn == "akamai" && n.After(ci.Expire.AddDate(0, 0, 0-hr.WarningDays)) {
@@ -124,7 +187,8 @@ func (hr HostReport) Report() {
 	}
 }
 
-func Build(group string) (properties []*PropertyInfo) {
+func Build(group string, property string) (properties []*PropertyInfo) {
+	log.Infof("Buildup property info, filter: group %s, property %s", group, property)
 	srvs := services.Services
 	properties = make([]*PropertyInfo, 0, 1000)
 	groupResponse, err := srvs.Properties.PapiClient.GetGroups(context.Background())
@@ -140,7 +204,6 @@ func Build(group string) (properties []*PropertyInfo) {
 				GroupID:    grp.GroupID,
 			}
 			if group == "" || group == grp.GroupName {
-
 				pl, err2 := srvs.Properties.GetProperties(context.Background(), plrq)
 				if err2 != nil {
 					log.Errorf("get properties for group %s - %w", grp, err2)
@@ -150,7 +213,9 @@ func Build(group string) (properties []*PropertyInfo) {
 				for _, x := range pl.Properties.Items {
 					pv := 0
 					if x.ProductionVersion != nil {
-
+						if property != "" && x.PropertyName != property {
+							continue
+						}
 						pv = *x.ProductionVersion
 
 						prhrq := papi.GetPropertyVersionHostnamesRequest{
@@ -263,7 +328,7 @@ func Build(group string) (properties []*PropertyInfo) {
 							Siteshield:   siteshield,
 							Origins:      origins,
 							Hosts:        hosts,
-							Behaviors:    pb,
+							Summary:      pb,
 						}
 						properties = append(properties, propinfo)
 					}
