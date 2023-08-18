@@ -5,7 +5,7 @@
     "commands" : [
         {
             "name":"review",
-            "version":"v0.1.2",
+            "version":"v0.1.3",
             "aliases": ["statistics"],
             "description":"review akamai usage, certificates, properties",
             "bin": "https://github.com/ericdebeij/akamai-review/releases/download/{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
