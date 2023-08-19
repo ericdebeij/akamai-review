@@ -54,6 +54,9 @@ Flags:
 
 Use "akamai-review [command] --help" for more information about a command.
 ```
+## Caching and rate limits
+The first time you run some of the reports, it might take quite a while as properties and rules need to be downloaded. For this reason that kind of (immutable) information is cached. You might also run into rate limits. On subsequent call only changed configurations need to be downloaded. 
+
 ## Config file
 A config file can be used for global parameters which are often used as well as for some default values of command specific parameters (like config and product).
 The default config name is .akamai-review.yaml, the file will be searched for in the current directory as well as in the users home directory.
