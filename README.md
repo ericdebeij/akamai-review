@@ -18,42 +18,10 @@ This is sample software. As such this software comes with absolutely no warranty
 
 ## Command line
 ```bash
-% akamai review
+% akamai review subcommand
 ```
 or use the downloaded binary
 
-## Usage
-```bash
-akamai-review is a utility collection to extract information from
-your akamai account and perform checks on it that need to be performed
-on a regular base.
-
-Usage:
-  akamai-review [command]
-
-Available Commands:
-  cps-certificates  List certificates as defined in cps
-  help              Help about any command
-  hosts-certificate List of all hostnames in your account per property with dns and certificate information
-  pm-behaviors      An overview of the behaviors in a propery
-  pm-hosts          List of all hostnames in your account per property with dns and certificate information
-  pm-origins        An overview of the origins
-  usage-cpcode      An overview of the usage for a month per cpcode and a comparison with the previous month
-
-Flags:
-      --accountkey string   akamai account switch key
-      --cache string        cache folder (default "~/.akamai-cache")
-      --config string       config file with all default parameters (default ".akamai-review.yaml")
-      --edgerc string       akamai location of the credentials file (default "~/.edgerc")
-  -h, --help                help for akamai-review
-      --logfile string      logging output
-      --loglevel string     logging level (default "FATAL")
-      --resolver string     resolver to be used (default "8.8.8.8:53")
-      --section string      akamai section of the credentials file (default "default")
-      --warningdays int     warning days for certificate issues (default 14)
-
-Use "akamai-review [command] --help" for more information about a command.
-```
 ## Caching and rate limits
 The first time you run some of the reports, it might take quite a while as properties and rules need to be downloaded. For this reason that kind of (immutable) information is cached. You might also run into rate limits. On subsequent call only changed configurations need to be downloaded. 
 
@@ -62,6 +30,54 @@ A config file can be used for global parameters which are often used as well as 
 The default config name is .akamai-review.yaml, the file will be searched for in the current directory as well as in the users home directory.
 
 For an example of the config file, see the example directory.
+
+# Usage
+See [akamai-review](akamai-review.md)
+
+# Reports
+The following reports are currently supported
+
+## cps-certificates
+See [akamai-review cps-certificates](akamai-review_cps-certificates.md)
+
+List certificates as defined in cps.
+
+Columns: cn,san,cdn
+
+## hosts-certificate
+See [akamai-review hosts-certificate](akamai-review_hosts-certificate.md)
+
+List of all hostnames in your account per property with dns and certificate information
+
+Columns: host,cdn,security,subject-cn,issuer-cn,expires,expire-days
+
+## usage-cpcode
+See [akamai-review usage-cpcode](akamai-review_usage-cpcode.md)
+
+An overview of the usage for a month per cpcode and a comparison with the previous month
+
+Columns: cpcode,cpname,repgrp,2023-07(GB),2023-06(GB),diff(GB),2023-07(Hits),2023-06(Hits),diff(Hits)
+
+## pm-hosts
+See [akamai-review pm-hosts](akamai-review_pm-hosts.md)
+
+List of all hostnames in your account per property with dns and certificate information
+
+Columns: group,property,host,edgehost,cdn,ips,cert-subject,cert-issuer,cert-expire
+
+## pm-origins
+See [akamai-review pm-origins](akamai-review_pm-origins.md)
+
+An overview of the origins
+
+Columns: group,property,origin,origintype,forward,hostmatch,pathmatch,siteshield,ips
+
+## pm-behaviors
+See [akamai-review pm-behaviors](akamai-review_pm-behaviors.md)
+
+An overview of the behaviors in a propery
+
+Columns: group,property,behaviors
 
 # Contribution
 
