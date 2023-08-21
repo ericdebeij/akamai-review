@@ -32,48 +32,48 @@ The default config name is .akamai-review.yaml, the file will be searched for in
 For an example of the config file, see the example directory.
 
 # Usage
-See [akamai-review](akamai-review.md)
+See [akamai-review](doc/akamai-review.md)
 
 # Reports
 The following reports are currently supported
 
 ## cps-certificates
-See [akamai-review cps-certificates](akamai-review_cps-certificates.md)
+See [akamai-review cps-certificates](doc/akamai-review_cps-certificates.md)
 
 List certificates as defined in cps.
 
 Columns: cn,san,cdn
 
 ## hosts-certificate
-See [akamai-review hosts-certificate](akamai-review_hosts-certificate.md)
+See [akamai-review hosts-certificate](doc/akamai-review_hosts-certificate.md)
 
 List of all hostnames in your account per property with dns and certificate information
 
 Columns: host,cdn,security,subject-cn,issuer-cn,expires,expire-days
 
 ## usage-cpcode
-See [akamai-review usage-cpcode](akamai-review_usage-cpcode.md)
+See [akamai-review usage-cpcode](doc/akamai-review_usage-cpcode.md)
 
 An overview of the usage for a month per cpcode and a comparison with the previous month
 
 Columns: cpcode,cpname,repgrp,2023-07(GB),2023-06(GB),diff(GB),2023-07(Hits),2023-06(Hits),diff(Hits)
 
 ## pm-hosts
-See [akamai-review pm-hosts](akamai-review_pm-hosts.md)
+See [akamai-review pm-hosts](doc/akamai-review_pm-hosts.md)
 
 List of all hostnames in your account per property with dns and certificate information
 
 Columns: group,property,host,edgehost,cdn,ips,cert-subject,cert-issuer,cert-expire
 
 ## pm-origins
-See [akamai-review pm-origins](akamai-review_pm-origins.md)
+See [akamai-review pm-origins](doc/akamai-review_pm-origins.md)
 
 An overview of the origins
 
 Columns: group,property,origin,origintype,forward,hostmatch,pathmatch,siteshield,ips
 
 ## pm-behaviors
-See [akamai-review pm-behaviors](akamai-review_pm-behaviors.md)
+See [akamai-review pm-behaviors](doc/akamai-review_pm-behaviors.md)
 
 An overview of the behaviors in a propery
 
