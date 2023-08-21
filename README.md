@@ -22,6 +22,11 @@ This is sample software. As such this software comes with absolutely no warranty
 ```
 or use the downloaded binary
 
+Example:
+```bash
+% akamai review cps-certificates
+```
+
 ## Caching and rate limits
 The first time you run some of the reports, it might take quite a while as properties and rules need to be downloaded. For this reason that kind of (immutable) information is cached. You might also run into rate limits. On subsequent call only changed configurations need to be downloaded. 
 
