@@ -20,8 +20,10 @@ func Create(export string) (csvx *CsvExport, err error) {
 	csvx.filehandle, err = os.Create(export)
 	if err != nil {
 		log.Fatalf("csvx - failed to create file %s, %v", export, err)
+		return
 	}
 	csvx.csvwriter = csv.NewWriter(csvx.filehandle)
+	log.Infof("CSV export created: %s", export)
 	return
 }
 

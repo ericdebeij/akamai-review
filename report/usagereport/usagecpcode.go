@@ -1,16 +1,15 @@
 package usagereport
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strings"
 	"time"
 
-	"os"
 	"strconv"
 
 	"github.com/apex/log"
 	"github.com/ericdebeij/akamai-review/v3/conv/yearmonth"
+	"github.com/ericdebeij/akamai-review/v3/exportx"
 	"github.com/ericdebeij/akamai-review/v3/services"
 )
 
@@ -38,7 +37,6 @@ func (ur UsageCpcode) Report() {
 		ur.Period = yearmonth.Add(yearmonth.FromTime(time.Now()), -1)
 	}
 	ur.Export = strings.NewReplacer("PERIOD", ur.Period).Replace(ur.Export)
-	fmt.Println(ur.Export)
 
 	tm := yearmonth.Add(ur.Period, 1)
 	fm := yearmonth.Add(tm, -2)
@@ -88,18 +86,14 @@ func (ur UsageCpcode) Report() {
 		return
 	}
 
-	f, err := os.Create(ur.Export)
+	csvx, err := exportx.Create(ur.Export)
 	if err != nil {
-		log.Fatalf("failed to open file: %w", err)
+		log.Fatalf("failed to open file: %v", err)
 		return
 	}
-	defer f.Close()
+	defer csvx.Close()
 
-	w := csv.NewWriter(f)
-	defer w.Flush()
-
-	r := []string{"cpcode", "cpname", "repgrp", ur.Period + "(GB)", fm + "(GB)", "diff(GB)", ur.Period + "(Hits)", fm + "(Hits)", "diff(Hits)"}
-	w.Write(r)
+	csvx.Header("cpcode", "cpname", "repgrp", ur.Period+"(GB)", fm+"(GB)", "diff(GB)", ur.Period+"(Hits)", fm+"(Hits)", "diff(Hits)")
 
 	for cpcode, vs := range sum {
 		cpinfo := cpinfos.FindCpcode(cpcode)
@@ -108,7 +102,7 @@ func (ur UsageCpcode) Report() {
 		for _, rg := range rginfo.Groups {
 			rgroup = append(rgroup, rg.ReportingGroupName)
 		}
-		w.Write([]string{strconv.Itoa(cpcode), cpinfo.CpcodeName,
+		csvx.Write(strconv.Itoa(cpcode), cpinfo.CpcodeName,
 			strings.Join(rgroup, ","),
 			fmt.Sprintf("%f", vs.currentBytes),
 			fmt.Sprintf("%f", vs.prevBytes),
@@ -116,6 +110,6 @@ func (ur UsageCpcode) Report() {
 			fmt.Sprintf("%f", vs.currentHits),
 			fmt.Sprintf("%f", vs.prevHits),
 			fmt.Sprintf("%f", vs.currentHits-vs.prevHits),
-		})
+		)
 	}
 }
