@@ -11,9 +11,10 @@ import (
 
 // originlistCmd represents the originlist command
 var pmbehaviorsCmd = &cobra.Command{
-	Use:   "pm-behaviors",
-	Short: "An overview of the behaviors in a propery",
-	Long:  `An overview of the properties and the behaviors implemented or details about a specific behavior`,
+	Use:     "pm-behaviors",
+	Aliases: []string{"pmb"},
+	Short:   "An overview of the behaviors in a propery",
+	Long:    `An overview of the properties and the behaviors implemented or details about a specific behavior`,
 	Run: func(cmd *cobra.Command, args []string) {
 		or := &propreport.BehaviorReport{
 			Export:   viper.GetString("pm-behaviors.export"),
@@ -30,5 +31,5 @@ func init() {
 	param(pmbehaviorsCmd, "group", "pm-behaviors.group", "", "filter for the group")
 	param(pmbehaviorsCmd, "property", "pm-behaviors.property", "", "filter for the property")
 	param(pmbehaviorsCmd, "behavior", "pm-behaviors.behavior", "", "provide details about the specific behavior")
-	rootCmd.AddCommand(pmbehaviorsCmd)
+	RootCmd.AddCommand(pmbehaviorsCmd)
 }

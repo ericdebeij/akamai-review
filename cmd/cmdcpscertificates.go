@@ -11,9 +11,10 @@ import (
 
 // cpscertificatesCmd represents the cpsList command
 var cpscertificatesCmd = &cobra.Command{
-	Use:   "cps-certificates",
-	Short: "List certificates as defined in cps",
-	Long:  `List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai`,
+	Use:     "cps-certificates",
+	Aliases: []string{"cpsc"},
+	Short:   "List certificates as defined in cps",
+	Long:    `List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cr := &cpsreport.CertReport{
 			Contract: viperAlias("cps-certificates", "contract"),
@@ -27,5 +28,5 @@ var cpscertificatesCmd = &cobra.Command{
 func init() {
 	param(cpscertificatesCmd, "export", "cps-certificates.export", "cps-certificates.csv", "contract to be used")
 	param(cpscertificatesCmd, "contract", "cps-certificates.contract", "", "contract to be used")
-	rootCmd.AddCommand(cpscertificatesCmd)
+	RootCmd.AddCommand(cpscertificatesCmd)
 }

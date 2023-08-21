@@ -11,8 +11,9 @@ import (
 
 // originlistCmd represents the originlist command
 var pmoriginsCmd = &cobra.Command{
-	Use:   "pm-origins",
-	Short: "An overview of the origins",
+	Use:     "pm-origins",
+	Aliases: []string{"pmo"},
+	Short:   "An overview of the origins",
 	Long: `An overview of the properties and the origins used within the property. In order to find this information the property manager rules are downloaded (and stored in a cache).
 At a high level the property match criteria are extracted from the config file. (Only a limited number of conditions are shown). 
 For an origin the type of origin (web,ns), forward host header and ip-address is shown (not possible for variable origins)`,
@@ -28,5 +29,5 @@ For an origin the type of origin (web,ns), forward host header and ip-address is
 func init() {
 	param(pmoriginsCmd, "export", "pm-origins.export", "pm-origins.csv", "name of the exportfile")
 	param(pmoriginsCmd, "group", "pm-origins.group", "", "filter for the group")
-	rootCmd.AddCommand(pmoriginsCmd)
+	RootCmd.AddCommand(pmoriginsCmd)
 }

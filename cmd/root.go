@@ -19,8 +19,8 @@ const cfgDefaultFile = ".akamai-review.yaml"
 
 var cfgFile string
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "akamai-review",
 	Short: "Review your account assets",
 	Long: `akamai-review is a utility collection to extract information from
@@ -36,7 +36,7 @@ on a regular base.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -87,11 +87,11 @@ func param(cmd *cobra.Command, flag string, vip string, def interface{}, help st
 	viper.BindPFlag(vip, cmd.PersistentFlags().Lookup(flag))
 }
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgDefaultFile, "config file with all default parameters")
+	RootCmd.CompletionOptions.DisableDefaultCmd = true
 
 	for _, p := range services.Parameters {
-		param(rootCmd, p.Flag, p.Viber, p.Default, p.Help)
+		param(RootCmd, p.Flag, p.Viber, p.Default, p.Help)
 	}
 
 	cobra.OnInitialize(initConfig)
