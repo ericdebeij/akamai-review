@@ -53,46 +53,46 @@ See [akamai-review](doc/akamai-review.md)
 The following reports are currently supported
 
 ## cps-certificates
-See [akamai-review cps-certificates](doc/akamai-review_cps-certificates.md)
-
 List certificates as defined in cps.
 
 Columns: cn,san,cdn
 
-## hosts-certificate
-See [akamai-review hosts-certificate](doc/akamai-review_hosts-certificate.md)
+See [akamai-review cps-certificates](doc/akamai-review_cps-certificates.md)
 
+## hosts-certificate
 List of all hostnames in your account per property with dns and certificate information
 
 Columns: host,cdn,security,subject-cn,issuer-cn,expires,expire-days
 
-## usage-cpcode
-See [akamai-review usage-cpcode](doc/akamai-review_usage-cpcode.md)
+See [akamai-review hosts-certificate](doc/akamai-review_hosts-certificate.md)
 
+## usage-cpcode
 An overview of the usage for a month per cpcode and a comparison with the previous month
 
 Columns: cpcode,cpname,repgrp,2023-07(GB),2023-06(GB),diff(GB),2023-07(Hits),2023-06(Hits),diff(Hits)
 
-## pm-hosts
-See [akamai-review pm-hosts](doc/akamai-review_pm-hosts.md)
+See [akamai-review usage-cpcode](doc/akamai-review_usage-cpcode.md)
 
+## pm-hosts
 List of all hostnames in your account per property with dns and certificate information
 
 Columns: group,property,host,edgehost,cdn,ips,cert-subject,cert-issuer,cert-expire
 
-## pm-origins
-See [akamai-review pm-origins](doc/akamai-review_pm-origins.md)
+See [akamai-review pm-hosts](doc/akamai-review_pm-hosts.md)
 
+## pm-origins
 An overview of the origins
 
 Columns: group,property,origin,origintype,forward,hostmatch,pathmatch,siteshield,ips
 
-## pm-behaviors
-See [akamai-review pm-behaviors](doc/akamai-review_pm-behaviors.md)
+See [akamai-review pm-origins](doc/akamai-review_pm-origins.md)
 
+## pm-behaviors
 An overview of the behaviors in a propery
 
 Columns: group,property,behaviors
+
+See [akamai-review pm-behaviors](doc/akamai-review_pm-behaviors.md)
 
 # Contribution
 
