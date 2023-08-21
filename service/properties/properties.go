@@ -55,7 +55,7 @@ func (ps *Propsv) GetRuleTree(params papi.GetRuleTreeRequest) (tree *papi.GetRul
 		tree, err = ps.PapiClient.GetRuleTree(context.Background(), params)
 
 		if err != nil {
-			log.Error(fmt.Sprint(err))
+			log.Fatal(fmt.Sprint(err))
 			return
 		}
 
