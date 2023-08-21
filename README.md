@@ -32,6 +32,21 @@ The default config name is .akamai-review.yaml, the file will be searched for in
 For an example of the config file, see the example directory.
 
 # Usage
+```
+Usage:
+  akamai-review [command]
+
+Available Commands:
+  cps-certificates  List certificates as defined in cps
+  help              Help about any command
+  hosts-certificate List of all hostnames in your account per property with dns and certificate information
+  pm-behaviors      An overview of the behaviors in a propery
+  pm-hosts          List of all hostnames in your account per property with dns and certificate information
+  pm-origins        An overview of the origins
+  usage-cpcode      An overview of the usage for a month per cpcode and a comparison with the previous month
+```
+
+## Options
 See [akamai-review](doc/akamai-review.md)
 
 # Reports
