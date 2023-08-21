@@ -254,6 +254,9 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 							ValidateRules:   false,
 						}
 						pt := srvs.Properties.GetRuleTree(prtrq)
+						if pt == nil {
+							log.Fatalf("No rule tree for %+v", prtrq)
+						}
 
 						pb := srvs.Properties.FindBehaviors(&pt.Rules)
 
@@ -310,7 +313,7 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 
 								ips, _, err := srvs.Dns.DnsInfo(ohostname)
 								if err != nil {
-									log.Infof("dns %s: %w")
+									log.Infof("dns %s: %v", ohostname, err)
 								}
 
 								origin := &OriginInfo{
