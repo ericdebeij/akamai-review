@@ -105,7 +105,7 @@ Rate controls might hinder the process.
 
 * Some services handle rate controls correctly (if we run into a 429 whole checking if an IP-address is an Akamai edge-server we just wait the required number of seconds and try again), but others result in an error. 
 * There is caching for some immutable elements (e.g. property rules of activated versions), in that case just restarting the process after a while will solve the problem.
-* You might want to run the command with "--loglevel debug --logile debug.log" to capture all requests and check for the last errors. In that case all output including INFO and FATAL will go only to the logfile.
+* You might want to run the command with "--loglevel debug --logfile debug.log" to capture all requests and check for the last errors. In that case all output including INFO and FATAL will go only to the logfile.
 * The hosts-certificate command can only be used once a minute as the rate control for the API to get all hosts of an account can only be run once a minute.
 
 Not all errors are not handled in a consistent way.
