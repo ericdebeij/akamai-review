@@ -99,6 +99,19 @@ Columns: group,property,behaviors
 
 See [akamai-review pm-behaviors](doc/akamai-review_pm-behaviors.md)
 
+# Known issues
+
+Rate controls might hinder the process. 
+
+* Some services handle rate controls correctly (if we run into a 429 whole checking if an IP-address is an Akamai edge-server we just wait the required number of seconds and try again), but others result in an error. 
+* There is caching for some immutable elements (e.g. property rules of activated versions), in that case just restarting the process after a while will solve the problem.
+* You might want to run the command with "--loglevel debug --logile debug.log" to capture all requests and check for the last errors. In that case all output including INFO and FATAL will go only to the logfile.
+* The hosts-certificate command can only be used once a minute as the rate control for the API to get all hosts of an account can only be run once a minute.
+
+Not all errors are not handled in a consistent way.
+
+See also the [ToDo list](todo.md)
+
 # Contribution
 
 By submitting a contribution (the “Contribution”) to this project, and for good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, you (the “Assignor”) irrevocably convey, transfer, and assign the Contribution to the owner of the repository (the “Assignee”), and the Assignee hereby accepts, all of your right, title, and interest in and to the Contribution along with all associated copyrights, copyright registrations, and/or applications for registration and all issuances, extensions and renewals thereof (collectively, the “Assigned Copyrights”). You also assign all of your rights of any kind whatsoever accruing under the Assigned Copyrights provided by applicable law of any jurisdiction, by international treaties and conventions and otherwise throughout the world. 
