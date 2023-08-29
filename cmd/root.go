@@ -81,6 +81,9 @@ func param(cmd *cobra.Command, flag string, vip string, def interface{}, help st
 		}
 	case bool:
 		cmd.PersistentFlags().Bool(flag, def, help)
+	case []string:
+		cmd.PersistentFlags().StringArray(flag, def, help)
+		viper.SetDefault(vip, def)
 	default:
 		log.Fatalf("type for default value not yet supported %s", def)
 	}
@@ -137,7 +140,7 @@ func initConfig() {
 	if err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	} else {
-		log.Infof("confog file %v", err)
+		log.Infof("config file %v", err)
 		if errors.Is(err, os.ErrNotExist) && viper.ConfigFileUsed() != cfgDefaultFile {
 			fmt.Fprintf(os.Stderr, "config file %s not found\n", viper.ConfigFileUsed())
 		}

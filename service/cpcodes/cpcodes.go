@@ -73,6 +73,7 @@ type Repgroup struct {
 	AccessGroup        AccessGroupshort    `json:"accessGroup"`
 }
 
+// FindByName takes the name and returns the id
 func (rgs *Repgroups) FindByName(name string) (rg *Repgroup) {
 	for i := range rgs.Groups {
 		if rgs.Groups[i].ReportingGroupName == name {
@@ -122,6 +123,7 @@ func (cs *CpcodeService) GetRepgroups(filter string) (repGroups *Repgroups, err 
 	return
 }
 
+// MapCpcodeRepgroup creates a map indexed by the CPCode, returning a list of Reporting Group Ids the CPCode belongs too.
 func (repGroups *Repgroups) MapCpcodeRepgroup() (m map[int][]int) {
 	m = make(map[int][]int)
 	for _, g := range repGroups.Groups {
