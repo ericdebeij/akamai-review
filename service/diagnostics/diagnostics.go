@@ -128,7 +128,7 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 		ds.Response, err = ds.Session.Exec(req, &rsb)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Errorf("isakamaiip - request, %v, %+v", err, ips)
 			return
 		}
 
@@ -149,14 +149,14 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 		if ds.Response.StatusCode != 429 {
 			data, e := io.ReadAll(ds.Response.Body)
 			if e != nil {
-				fmt.Println(e)
+				log.Errorf("isakamaiip, status %v, data error %v", ds.Response.StatusCode, e)
 			}
-			fmt.Println(string(data))
+			log.Errorf("isakamaiip, status %v, data %v", ds.Response.StatusCode, string(data))
 
 			err = fmt.Errorf("status code: %d", ds.Response.StatusCode)
 			return
 		}
-		fmt.Println("running into rate control, wait 60 seconds")
+		log.Infof("running into rate control, wait 60 seconds")
 		ds.FlushCache()
 		time.Sleep(time.Minute)
 	}

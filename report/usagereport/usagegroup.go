@@ -38,8 +38,32 @@ func (ur *UsageRG) Report() {
 		ur.Unit = "GB"
 	}
 
-	frommonth := yearmonth.Add(ur.FromMonth, -1)
-	x, err := srvs.AkamaiBilling.GetUsageCpcode(ur.Contract, ur.Product, frommonth, ur.ToMonth)
+	tomonth := yearmonth.Add(ur.ToMonth, +1)
+
+	// yes, it is weird, the unit return from the bulling API for Bytes is MB, but we can do the calculation
+	factor := 1.0
+	if ur.StatType == "Bytes" {
+		switch ur.Unit {
+		case "B":
+			factor = 1e9
+		case "KB":
+			factor = 1e6
+		case "MB":
+			factor = 1e3
+		case "GB":
+
+		case "TB":
+			factor = 1e-3
+		case "PB":
+			factor = 1e-6
+		default:
+			log.Errorf("usage-repgroup: unknown unit for Bytes: %v", ur.Unit)
+		}
+	}
+
+	log.Infof("usage-repgroup tomonth %v, factor %v, %+v", tomonth, factor, ur)
+
+	x, err := srvs.AkamaiBilling.GetUsageCpcode(ur.Contract, ur.Product, ur.FromMonth, tomonth)
 	if err != nil {
 		log.Fatalf("getusagecpcode error: %w", err)
 		return
@@ -55,11 +79,20 @@ func (ur *UsageRG) Report() {
 	reportingGroups := ur.ReportingGroups
 	if len(reportingGroups) == 0 {
 		for _, rg := range rginfos.Groups {
-			reportingGroups = append(reportingGroups, rg.ReportingGroupName)
+			for _, contract := range rg.Contracts {
+				if contract.ContractID == ur.Contract {
+					reportingGroups = append(reportingGroups, rg.ReportingGroupName)
+				}
+			}
 		}
 	}
 	log.Infof("reporting groups selected %v", reportingGroups)
 	numGroups := len(reportingGroups)
+
+	cpcodes, errc := srvs.AkamaiCpcodes.GetCpcodes()
+	if errc != nil {
+		log.Fatalf("usage-repgroup: get cpcode %v", errc)
+	}
 
 	// Prepare CSV file export
 	csvx, errx := exportx.Create(ur.Export)
@@ -87,7 +120,7 @@ func (ur *UsageRG) Report() {
 			for _, cpv := range rgc.Cpcodes {
 				colid, found := cpcode2colmap[cpv.CpcodeID]
 				if found {
-					log.Infof("cpcode %v(%v) found in multiple reporting groups (%s, %s), first group used", cpv.CpcodeID, cpv.CpcodeName, reportingGroups[colid], rg.ReportingGroupName)
+					log.Warnf("cpcode %v (%v) found in multiple reporting groups (%s, %s), first group used", cpv.CpcodeID, cpv.CpcodeName, reportingGroups[colid], rg.ReportingGroupName)
 				} else {
 					cpcode2colmap[cpv.CpcodeID] = rgi
 				}
@@ -97,26 +130,6 @@ func (ur *UsageRG) Report() {
 
 	var restcps []int
 
-	// yes, it is weird, the unit return from the bulling API for Bytes is MB, but we can do the calculation
-	factor := 1.0
-	if ur.StatType == "Bytes" {
-		switch ur.Unit {
-		case "B":
-			factor = 1e6
-		case "KB":
-			factor = 1e3
-		case "MB":
-
-		case "GB":
-			factor = 1e-3
-		case "TB":
-			factor = 1e-6
-		case "PB":
-			factor = 1e-9
-		default:
-			log.Errorf("usage-repgroup: unknown unit for Bytes: %v", ur.Unit)
-		}
-	}
 	// Now run thru the data and find the Bytes
 	for _, p := range x.UsagePeriods {
 		values := make([]float64, numGroups+1)
@@ -125,7 +138,8 @@ func (ur *UsageRG) Report() {
 			if !found {
 				col = numGroups
 				if !slices.Contains(restcps, s.CpCode) {
-					log.Infof("cpcode %v found without reportinggroup", s.CpCode)
+					cpcode := cpcodes.FindCpcode(s.CpCode)
+					log.Warnf("cpcode %v (%v) used without reportinggroup", s.CpCode, cpcode.CpcodeName)
 				}
 			}
 			for _, v := range s.Stats {

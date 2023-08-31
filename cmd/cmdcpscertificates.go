@@ -12,7 +12,7 @@ import (
 // cpscertificatesCmd represents the cpsList command
 var cpscertificatesCmd = &cobra.Command{
 	Use:     "cps-certificates",
-	Aliases: []string{"cpsc"},
+	Aliases: []string{"cc", "cps-c"},
 	Short:   "List certificates as defined in cps",
 	Long:    `List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai`,
 	Run: func(cmd *cobra.Command, args []string) {

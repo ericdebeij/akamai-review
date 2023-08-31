@@ -15,7 +15,7 @@ import (
 // originlistCmd represents the originlist command
 var usageRepgrpCmd = &cobra.Command{
 	Use:     "usage-repgroup",
-	Aliases: []string{"urg"},
+	Aliases: []string{"ur", "urg", "usage-r"},
 	Short:   "An overview of the usage for a month per cpcode and a comparison with the previous month",
 	Long:    `Uses the billing API to get an overview of the usage for a specific month and compares this with the previous month, both bytes and hits`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -27,7 +27,7 @@ var usageRepgrpCmd = &cobra.Command{
 			Export:          viper.GetString("usage-repgroup.export"),
 			ReportingGroups: viper.GetStringSlice("usage-repgroup.repgroups"),
 			StatType:        viper.GetString("usage-repgroup.type"),
-			Unit:            viper.GetString("usage-report.unit"),
+			Unit:            viper.GetString("usage-repgroup.unit"),
 		}
 		um.Report()
 	},

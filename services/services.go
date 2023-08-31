@@ -112,5 +112,5 @@ func init() {
 	addparam("cache", "akamai.cache", "~/.akamai-cache", "cache folder")
 	addparam("loglevel", "log.level", "FATAL", "logging level")
 	addparam("logfile", "log.file", "", "logging output")
-	addparam("warningdays", "certificate.warningdays", 14, "warning days for certificate issues")
+	addparam("warningdays", "warningdays", 14, "warning days for certificate issues")
 }

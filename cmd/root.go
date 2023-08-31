@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/apex/log"
-	"github.com/apex/log/handlers/text"
 	"github.com/ericdebeij/akamai-review/v3/services"
+	"github.com/ericdebeij/akamai-review/v3/util/logutil"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -43,28 +43,7 @@ func Execute() {
 }
 
 func Cleanup() {
-	closeLogFile()
-}
-
-var logfile *os.File
-var loghandler *text.Handler
-
-func openLogFile(logFilePath string) (err error) {
-
-	if logFilePath == "" {
-		logfile = os.Stderr
-	} else {
-		logfile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-	}
-	loghandler = text.New(logfile)
-	log.SetHandler(loghandler)
-	return err
-}
-
-func closeLogFile() {
-	if logfile != nil && logfile != os.Stderr && logfile != os.Stdout {
-		logfile.Close()
-	}
+	logutil.CloseLogFile()
 }
 
 func param(cmd *cobra.Command, flag string, vip string, def interface{}, help string) {
@@ -135,7 +114,7 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 
-	openLogFile(viper.GetString("log.file"))
+	logutil.OpenLogFile(viper.GetString("log.file"))
 	log.SetLevelFromString(viper.GetString("log.level"))
 	if err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())

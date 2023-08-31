@@ -152,7 +152,7 @@ func (bs *BillingService) GetUsageCpcode(contractId, productId, startMonth, endM
 	log.Debug(url)
 	req, err2 := http.NewRequest(http.MethodGet, url, nil)
 	if err2 != nil {
-		log.Fatalf("request error for : %w", err)
+		log.Fatalf("billing-monthly-summary: request error  %v", err)
 		err = err2
 		return
 	}
@@ -161,12 +161,12 @@ func (bs *BillingService) GetUsageCpcode(contractId, productId, startMonth, endM
 	bs.Response, err = bs.Session.Exec(req, msum)
 
 	if err != nil {
-		log.Fatalf("response error: %w", err)
+		log.Fatalf("billing-monthly-summary: response error %v", err)
 		return
 	}
 
 	if bs.Response.StatusCode >= 400 {
-		log.Fatalf("statuscode indicates error: %v", bs.Response.StatusCode)
+		log.Fatalf("billing-monthly-summary: statuscode %v", bs.Response.StatusCode)
 	}
 
 	return

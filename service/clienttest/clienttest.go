@@ -76,9 +76,15 @@ func (t *ClientTester) Testhost(hostname string) (info *ClientInfo) {
 	if strings.HasPrefix(hn, "*.") {
 		hn = "wildcard" + hn[1:]
 	}
+
 	ips, _, err := t.DnsService.DnsInfo(hn)
 	if err != nil {
-		log.Errorf("dns error %w", err)
+		log.Debugf("dns error, host %v, %v, sleep 5s, retry", hn, err)
+		time.Sleep(5 * time.Second)
+		ips, _, err = t.DnsService.DnsInfo(hn)
+		if err != nil {
+			log.Errorf("dns (retry) error, host %v, %v", hn, err)
+		}
 	}
 
 	info.Ips = ips
