@@ -49,9 +49,9 @@ func (hr *SecHostReport) Report() {
 	}
 	defer csvx.Close()
 	if hr.HttpTest {
-		csvx.Header("host", "cdn", "security", "subject-cn", "issuer-cn", "expires", "expire-days", "http-https")
+		csvx.Header("host", "cdn", "sec-config", "sec-policies", "IPs", "subject-cn", "issuer-cn", "expires", "expire-days", "http-https")
 	} else {
-		csvx.Header("host", "cdn", "security", "subject-cn", "issuer-cn", "expires", "expire-days")
+		csvx.Header("host", "cdn", "sec-config", "sec-policies", "IPs", "subject-cn", "issuer-cn", "expires", "expire-days")
 	}
 	nu := time.Now()
 	for _, ch := range x.HostnameCoverage {
@@ -70,14 +70,20 @@ func (hr *SecHostReport) Report() {
 		if testresult.Subject != "" {
 			expiredays = int(testresult.Expire.Sub(nu).Hours() / 24)
 		}
+
+		secconfig := ""
+		if ch.Configuration != nil {
+			secconfig = ch.Configuration.Name
+		}
+
 		if hr.HttpTest {
 			if len(testresult.Ips) > 0 {
 				//fmt.Print("..httptest..")
 				httptest = srvs.ClientTest.TestHttp("http://" + hn + "/")
 			}
-			csvx.Write(testresult.Hostname, testresult.Cdn, ch.PolicyNames, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays, httptest)
+			csvx.Write(testresult.Hostname, testresult.Cdn, secconfig, ch.PolicyNames, testresult.Ips, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays, httptest)
 		} else {
-			csvx.Write(testresult.Hostname, testresult.Cdn, ch.PolicyNames, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays)
+			csvx.Write(testresult.Hostname, testresult.Cdn, secconfig, ch.PolicyNames, testresult.Ips, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays)
 		}
 		if testresult.Err == "" && testresult.Cdn == "akamai" && nu.After(testresult.Expire.AddDate(0, 0, 0-hr.WarningDays)) {
 			fmt.Println("Host       :", testresult.Hostname)
