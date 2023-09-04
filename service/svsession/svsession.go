@@ -46,7 +46,7 @@ func NewSession(param *EdgeConfig) (s session.Session, err error) {
 	edgerc.AccountKey = param.AccountID
 
 	if err != nil {
-		log.Fatalf("edgerc error: %w")
+		log.Fatalf("edgerc error: %v", err)
 		return
 	}
 
