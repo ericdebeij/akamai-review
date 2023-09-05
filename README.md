@@ -78,6 +78,13 @@ Columns: cpcode,cpname,repgrp,2023-07(GB),2023-06(GB),diff(GB),2023-07(Hits),202
 
 See [akamai-review usage-cpcode](doc/akamai-review_usage-cpcode.md)
 
+## usage-repgroup
+An overview of the usage per reporting groups, multiple months
+
+Columns: month,reportinggroup...
+
+See [akamai-review usage-repgroup](doc/akamai-review_usage-repgroup.md)
+
 ## pm-hosts
 List of all hostnames in your account per property with dns and certificate information
 
