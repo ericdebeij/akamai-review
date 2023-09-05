@@ -49,6 +49,7 @@ Available Commands:
   pm-hosts          List of all hostnames in your account per property with dns and certificate information
   pm-origins        An overview of the origins
   usage-cpcode      An overview of the usage for a month per cpcode and a comparison with the previous month
+  usage-repgroup    An overview of the usage per reportinggroup
 ```
 
 ## Options
