@@ -27,7 +27,7 @@ var usageCmd = &cobra.Command{
 }
 
 func init() {
-	param(usageCmd, "export", "usage-cpcode.export", "usage_PERIOD.csv", "name of the exportfile")
+	param(usageCmd, "export", "usage-cpcode.export", "usage-cpcode_PERIOD.csv", "name of the exportfile")
 	param(usageCmd, "contract", "usage-cpcode.contract", "", "contract to be used")
 	param(usageCmd, "period", "usage-cpcode.period", "", "period to be investigated")
 	param(usageCmd, "product", "usage-cpcode.product", "", "product code to be used")
