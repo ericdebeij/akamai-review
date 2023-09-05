@@ -29,7 +29,7 @@ cps-certificates:
   contract: ""
 hosts-certificate:
   export: "hosts-certificate.csv"
-  match: """
+  match: ""
   skip: "^failover\\..*$"
   httptest: false
 pm-origins:
