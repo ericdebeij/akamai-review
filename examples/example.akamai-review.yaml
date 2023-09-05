@@ -6,6 +6,9 @@ akamai:
 log:
   level: INFO
   file: ""
+dns:
+  resolver: 8.8.8.8:53
+warningdays: 14
 default:
   contract: ""
   product: ""
@@ -21,3 +24,43 @@ alias:
     dsa: "M-LC-14518"
     amd: "M-LC-118405"
     dd: "M-LC-122937"
+cps-certificates:
+	export: "cps-certificates.csv"
+  contract: ""
+hosts-certificate:
+	export: "hosts-certificate.csv"
+	match: """
+	skip: "^failover\\..*$"
+	httptest: false
+pm-origins:
+  export: pm-origins.csv
+  group: ""
+pm-hosts:
+  export: pm-hosts.csv
+  group: ""
+  property: ""
+  httptest: false
+pm-behaviors:
+  export: pm-behaviors.csv
+  group: ""
+  property: ""
+  behavior: ""
+usage-cpcode:
+  export: usage-cpcode_PERIOD.csv
+  contract: ""
+  product: ""
+  period: ""
+usage-repgroupe:
+  export: usage-repgroup.csv
+  contract: ""
+  product: ""
+  from: 2022-10
+  to: ""
+  type: Bytes
+  unit: GB
+  repgroups:
+  - NL
+  - BE
+  - EMEA
+  - USA
+  - APAC
