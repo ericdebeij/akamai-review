@@ -25,13 +25,13 @@ alias:
     amd: "M-LC-118405"
     dd: "M-LC-122937"
 cps-certificates:
-	export: "cps-certificates.csv"
+  export: "cps-certificates.csv"
   contract: ""
 hosts-certificate:
-	export: "hosts-certificate.csv"
-	match: """
-	skip: "^failover\\..*$"
-	httptest: false
+  export: "hosts-certificate.csv"
+  match: """
+  skip: "^failover\\..*$"
+  httptest: false
 pm-origins:
   export: pm-origins.csv
   group: ""
