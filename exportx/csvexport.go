@@ -10,13 +10,16 @@ import (
 )
 
 type CsvExport struct {
+	filename   string
 	filehandle *os.File
 	csvwriter  *csv.Writer
 	headers    []string
 }
 
 func Create(export string) (csvx *CsvExport, err error) {
-	csvx = &CsvExport{}
+	csvx = &CsvExport{
+		filename: export,
+	}
 	csvx.filehandle, err = os.Create(export)
 	if err != nil {
 		log.Fatalf("csvx - failed to create file %s, %v", export, err)
@@ -34,6 +37,7 @@ func (csvx *CsvExport) Close() {
 	if csvx.filehandle != nil {
 		csvx.filehandle.Close()
 	}
+	log.Infof("CSV export ready")
 }
 func (csvx *CsvExport) Header(h ...string) {
 	csvx.headers = h

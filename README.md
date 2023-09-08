@@ -107,6 +107,9 @@ Columns: group,property,behaviors
 
 See [akamai-review pm-behaviors](doc/akamai-review_pm-behaviors.md)
 
+# Release notes
+See [Release notes](release.md)
+
 # Known issues
 
 Rate controls might hinder the process. 

@@ -108,7 +108,7 @@ func (br BehaviorReport) Report() {
 	}
 }
 func (or OriginReport) Report() {
-	log.Infof("upm-origins %+v", or)
+	log.Infof("pm-origins %+v", or)
 	csvx, err := exportx.Create(or.Export)
 	if err != nil {
 		log.Fatalf("failed to open file %w", err)
@@ -177,13 +177,13 @@ func (hr HostReport) Report() {
 			)
 
 			if hr.WarningDays != 0 && ci.Err == "" && ci.Cdn == "akamai" && n.After(ci.Expire.AddDate(0, 0, 0-hr.WarningDays)) {
-				fmt.Println("Host       :", ci.Hostname)
-				fmt.Println("Expire date:", ci.Expire)
-				fmt.Println("Subject    :", ci.Subject)
-				fmt.Println("Issuer     :", ci.Issuer)
+				log.Warnf("Host       : %v", ci.Hostname)
+				log.Warnf("Expire date: %v", ci.Expire)
+				log.Warnf("Subject    : %v", ci.Subject)
+				log.Warnf("Issuer     : %v", ci.Issuer)
 				diff := ci.Expire.Sub(n)
 				dura := durafmt.Parse(diff)
-				fmt.Println("Time left:", dura)
+				log.Warnf("Time left: %v", dura)
 			}
 		}
 
@@ -191,7 +191,7 @@ func (hr HostReport) Report() {
 }
 
 func Build(group string, property string) (properties []*PropertyInfo) {
-	log.Infof("Buildup property info, filter: group:%v property:%v", group, property)
+	log.Infof("buildup property info, filter: group: %v property: %v", group, property)
 	srvs := services.Services
 	properties = make([]*PropertyInfo, 0, 1000)
 	groupResponse, err := srvs.Properties.PapiClient.GetGroups(context.Background())
@@ -302,9 +302,16 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 										}
 
 										if critmatch.Name == "path" {
-											tt := critmatch.Options["values"].([]interface{})
-											for _, tv := range tt {
-												pathmatch += " " + tv.(string)
+											x := critmatch.Options["values"]
+											switch x := x.(type) {
+											case string:
+												pathmatch += " " + x
+											case []interface{}:
+												for _, tv := range x {
+													pathmatch += " " + tv.(string)
+												}
+											default:
+												log.Warnf("expected type is []interface or string, received type %T value %+v", x, x)
 											}
 										}
 									}
@@ -313,7 +320,7 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 
 								ips, _, err := srvs.Dns.DnsInfo(ohostname)
 								if err != nil {
-									log.Infof("dns %s: %v", ohostname, err)
+									log.Errorf("dns %s: %v", ohostname, err)
 								}
 
 								origin := &OriginInfo{

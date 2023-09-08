@@ -42,10 +42,6 @@ func Execute() {
 	}
 }
 
-func Cleanup() {
-	logutil.CloseLogFile()
-}
-
 func param(cmd *cobra.Command, flag string, vip string, def interface{}, help string) {
 	switch def := def.(type) {
 	case string:
@@ -96,6 +92,15 @@ func viperAlias(base, key string) string {
 	return c
 }
 
+var mlog *logutil.MultiLogHandler
+
+// cleanup and close any open ends
+func Cleanup() {
+	if mlog != nil {
+		mlog.Close()
+	}
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 
@@ -114,8 +119,24 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 
-	logutil.OpenLogFile(viper.GetString("log.file"))
-	log.SetLevelFromString(viper.GetString("log.level"))
+	// parameters override the loglevel in the config
+	logconfig := make([]logutil.LogConfig, 0, 4)
+	if viper.GetString("log.level") != "" || viper.GetString("log.file") != "" {
+		logconfig = append(logconfig, logutil.LogConfig{
+			Level: viper.GetString("log.level"),
+			File:  viper.GetString("log.file"),
+		})
+	} else {
+		errx := viper.UnmarshalKey("log", &logconfig)
+		if errx != nil {
+			log.Fatalf("unmarshall log error %v", errx)
+		}
+	}
+	mlog = logutil.NewMultiLogHandler()
+	mlog.OpenFromConfig(logconfig)
+	log.SetLevel(mlog.MaxLevel)
+	log.SetHandler(mlog)
+
 	if err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	} else {

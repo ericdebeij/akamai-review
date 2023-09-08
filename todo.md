@@ -12,3 +12,4 @@ The following topics are on the wishlist
 - Usage reports with reporting groups
 - Aliases for products, contracts 
 - Aliases for commands
+- Multiple log files (per level)

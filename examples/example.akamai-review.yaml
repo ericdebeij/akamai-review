@@ -4,8 +4,10 @@ akamai:
   accountkey: ""
   cache: ~/.akamai-cache
 log:
-  level: INFO
+- level: INFO
   file: ""
+- level: debug
+  file: debug.log
 dns:
   resolver: 8.8.8.8:53
 warningdays: 14

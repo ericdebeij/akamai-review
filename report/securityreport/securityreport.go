@@ -2,7 +2,6 @@ package securityreport
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -86,13 +85,13 @@ func (hr *SecHostReport) Report() {
 			csvx.Write(testresult.Hostname, testresult.Cdn, secconfig, ch.PolicyNames, testresult.Ips, testresult.Subject, testresult.Issuer, testresult.Expire, expiredays)
 		}
 		if testresult.Err == "" && testresult.Cdn == "akamai" && nu.After(testresult.Expire.AddDate(0, 0, 0-hr.WarningDays)) {
-			fmt.Println("Host       :", testresult.Hostname)
-			fmt.Println("Expire date:", testresult.Expire)
-			fmt.Println("Subject    :", testresult.Subject)
-			fmt.Println("Issuer     :", testresult.Issuer)
+			log.Warnf("Host       : %v", testresult.Hostname)
+			log.Warnf("Expire date: %v", testresult.Expire)
+			log.Warnf("Subject    : %v", testresult.Subject)
+			log.Warnf("Issuer     : %v", testresult.Issuer)
 			diff := testresult.Expire.Sub(nu)
 			dura := durafmt.Parse(diff)
-			fmt.Println("Time left:", dura)
+			log.Warnf("Time left  : %v", dura)
 		}
 		//fmt.Println("ready")
 	}
