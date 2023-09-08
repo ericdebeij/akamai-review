@@ -1,13 +1,14 @@
 # Release notes
 
 ## 0.1.6 - log file improvement
-- Multiple log files supported, with logs cummulated to a provided level
+- Multiple log files supported, with logs cumulated to a provided level
 - Syntax change in .akamai-review.yaml
 ```
 log:
 - level: info
 - file: filename.log
 ```
+- Small bug fixes
 
 ## 0.1.5 - usage-repgroup
 - New subcommand added to collect usage data based on reporting groups
