@@ -3,6 +3,8 @@ Several utilities that can be used to review your Akamai account.
 
 This is sample software, will likely remain in draft state forever and there is no plan to maintain this, use at your own risk.
 
+More info see also the [blog post](https://discuss.akamai.com/t/akamai-cli-plugin-investigate-cdn-configurations-and-traffic/749) on discuss.akamai.com
+
 ## Akamai CLI Install
 ```bash
 %  akamai install ericdebeij/akamai-review
