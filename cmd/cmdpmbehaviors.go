@@ -12,7 +12,7 @@ import (
 // originlistCmd represents the originlist command
 var pmbehaviorsCmd = &cobra.Command{
 	Use:     "pm-behaviors",
-	Aliases: []string{"pmb", "pm-b"},
+	Aliases: []string{"pb", "pmb", "pm-b"},
 	Short:   "An overview of the behaviors in a propery",
 	Long:    `An overview of the properties and the behaviors implemented or details about a specific behavior`,
 	Run: func(cmd *cobra.Command, args []string) {
