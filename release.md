@@ -1,5 +1,8 @@
 # Release notes
 
+## 0.1.7 - not releaseed yet
+- Add contract column to pm-hosts
+
 ## 0.1.6 - log file improvement
 - Multiple log files supported, with logs cumulated to a provided level
 - Syntax change in .akamai-review.yaml

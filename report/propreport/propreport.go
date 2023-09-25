@@ -38,6 +38,7 @@ type BehaviorReport struct {
 }
 
 type PropertyInfo struct {
+	Contract     string
 	Groupname    string
 	Propertyname string
 	Siteshield   string
@@ -117,11 +118,12 @@ func (or OriginReport) Report() {
 
 	properties := Build(or.Group, or.Property)
 
-	csvx.Header("group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips")
+	csvx.Header("contract", "group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips")
 
 	for _, p := range properties {
 		for _, o := range p.Origins {
 			csvx.Write(
+				p.Contract,
 				p.Groupname,
 				p.Propertyname,
 				//strings.Join(hostnames, " "),
@@ -148,9 +150,9 @@ func (hr HostReport) Report() {
 	properties := Build(hr.Group, hr.Property)
 
 	if hr.HttpTest {
-		csvx.Header("group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire", "httptest")
+		csvx.Header("contract", "group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire", "httptest")
 	} else {
-		csvx.Header("group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire")
+		csvx.Header("contract", "group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire")
 	}
 
 	n := time.Now()
@@ -164,6 +166,7 @@ func (hr HostReport) Report() {
 			}
 
 			csvx.Write(
+				p.Contract,
 				p.Groupname,
 				p.Propertyname,
 				h.Hostname,
@@ -336,6 +339,7 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 							}
 						}
 						propinfo := &PropertyInfo{
+							Contract:     strings.Replace(x.ContractID, "ctr_", "", 1),
 							Groupname:    grp.GroupName,
 							Propertyname: x.PropertyName,
 							Siteshield:   siteshield,
