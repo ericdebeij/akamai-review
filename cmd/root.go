@@ -19,9 +19,19 @@ const cfgDefaultFile = ".akamai-review.yaml"
 
 var cfgFile string
 
+func initCommand() string {
+	if os.Getenv("AKAMAI_CLI") != "" {
+		// Need to use an unbreakable space as cobra uses only the first word of the command as the name in the help
+		return "akamai\u00A0review"
+	}
+	return "akamai-review"
+}
+
+var command = initCommand()
+
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "akamai-review",
+	Use:   command,
 	Short: "Review your account assets",
 	Long: `akamai-review is a utility collection to extract information from
 your akamai account and perform checks on it that need to be performed
