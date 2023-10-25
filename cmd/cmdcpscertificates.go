@@ -13,10 +13,10 @@ import (
 var cpscertificatesCmd = &cobra.Command{
 	Use:     "cps-certificates",
 	Aliases: []string{"cc", "cps-c"},
-	Short:   "List certificates as defined in cps",
+	Short:   "List certificates as defined in cps and the usage of the SANs",
 	Long:    `List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cr := &cpsreport.CertReport{
+		cr := &cpsreport.CertSanReport{
 			Contract: viperAlias("cps-certificates", "contract"),
 			Export:   viper.GetString("cps-certificates.export"),
 		}
