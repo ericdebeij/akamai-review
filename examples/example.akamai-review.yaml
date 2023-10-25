@@ -26,8 +26,11 @@ alias:
     dsa: "M-LC-14518"
     amd: "M-LC-118405"
     dd: "M-LC-122937"
-cps-certificates:
-  export: "cps-certificates.csv"
+cps-sans:
+  export: "cps-sans.csv"
+  contract: ""
+cps-overview:
+  export: "cps-overview.csv"
   contract: ""
 hosts-certificate:
   export: "hosts-certificate.csv"

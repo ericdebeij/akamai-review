@@ -1,23 +1,21 @@
-## akamai-review usage-cpcode
+## akamai-review cps-overview
 
-An overview of the usage for a month per cpcode and a comparison with the previous month
+Overview of all certificates as defined in cps
 
 ### Synopsis
 
-Uses the billing API to get an overview of the usage for a specific month and compares this with the previous month, both bytes and hits
+Overview of all certificates, ciphers, tls settings, mtls usage
 
 ```
-akamai-review usage-cpcode [flags]
+akamai-review cps-overview [flags]
 ```
 
 ### Options
 
 ```
       --contract string   contract to be used
-      --export string     name of the exportfile (default "usage-cpcode_PERIOD.csv")
-  -h, --help              help for usage-cpcode
-      --period string     period to be investigated
-      --product string    product code to be used
+      --export string     contract to be used (default "cps-overview.csv")
+  -h, --help              help for cps-overview
 ```
 
 ### Options inherited from parent commands

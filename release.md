@@ -1,7 +1,9 @@
 # Release notes
 
-## 0.1.7 - not releaseed yet
+## 0.1.7 - add cps-overview
 - Add contract column to pm-hosts
+- Rename cps-certificates to cps-sans
+- Add cps-overview to show all cps certificates, their cipher usage
 
 ## 0.1.6 - log file improvement
 - Multiple log files supported, with logs cumulated to a provided level

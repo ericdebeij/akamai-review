@@ -33,9 +33,8 @@ var command = initCommand()
 var RootCmd = &cobra.Command{
 	Use:   command,
 	Short: "Review your account assets",
-	Long: `akamai-review is a utility collection to extract information from
-your akamai account and perform checks on it that need to be performed
-on a regular base.`,
+	Long: `akamai review (or akamai-review) is an Akamai CLI plugin to extract information from
+your akamai account and perform checks on it`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//Run: func(cmd *cobra.Command, args []string) {

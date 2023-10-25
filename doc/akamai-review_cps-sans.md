@@ -1,23 +1,21 @@
-## akamai-review usage-cpcode
+## akamai-review cps-sans
 
-An overview of the usage for a month per cpcode and a comparison with the previous month
+List SANS/certificates as defined in cps and the usage of the SANs
 
 ### Synopsis
 
-Uses the billing API to get an overview of the usage for a specific month and compares this with the previous month, both bytes and hits
+List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai
 
 ```
-akamai-review usage-cpcode [flags]
+akamai-review cps-sans [flags]
 ```
 
 ### Options
 
 ```
       --contract string   contract to be used
-      --export string     name of the exportfile (default "usage-cpcode_PERIOD.csv")
-  -h, --help              help for usage-cpcode
-      --period string     period to be investigated
-      --product string    product code to be used
+      --export string     contract to be used (default "cps-sans.csv")
+  -h, --help              help for cps-sans
 ```
 
 ### Options inherited from parent commands

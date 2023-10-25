@@ -40,11 +40,15 @@ For an example of the config file, see the example directory.
 
 # Usage
 ```
+akamai review (or akamai-review) is an Akamai CLI plugin to extract information from
+your akamai account and perform checks on it.
+
 Usage:
-  akamai-review [command]
+  akamai review [command]
 
 Available Commands:
-  cps-certificates  List certificates as defined in cps
+  cps-overview      Overview of all certificates as defined in cps
+  cps-sans          List SANS/certificates as defined in cps and the usage of the SANs
   help              Help about any command
   hosts-certificate List of all hostnames in your account per property with dns and certificate information
   pm-behaviors      An overview of the behaviors in a propery
@@ -52,6 +56,8 @@ Available Commands:
   pm-origins        An overview of the origins
   usage-cpcode      An overview of the usage for a month per cpcode and a comparison with the previous month
   usage-repgroup    An overview of the usage per reportinggroup
+
+Use "akamai review [command] --help" for more information about a command.
 ```
 
 ## Options
