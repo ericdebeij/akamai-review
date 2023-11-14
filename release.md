@@ -1,5 +1,8 @@
 # Release notes
 
+## 0.1.8+9 - fix empty export
+- Irregular empty export fix
+
 ## 0.1.7 - add cps-overview
 - Add contract column to pm-hosts
 - Rename cps-certificates to cps-sans

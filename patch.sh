@@ -1,0 +1,1 @@
+go build -o patch/akamai-review && cp patch/akamai-review ~/.akamai-cli/src/akamai-review/akamai-review
