@@ -10,38 +10,38 @@ import (
 )
 
 type CsvExport struct {
-	filename   string
-	filehandle *os.File
-	csvwriter  *csv.Writer
-	headers    []string
+	filename string
+	rows     [][]string
+	headers  []string
 }
 
 func Create(export string) (csvx *CsvExport, err error) {
 	csvx = &CsvExport{
 		filename: export,
+		rows:     [][]string{},
+		headers:  []string{},
 	}
-	csvx.filehandle, err = os.Create(export)
-	if err != nil {
-		log.Fatalf("csvx - failed to create file %s, %v", export, err)
-		return
-	}
-	csvx.csvwriter = csv.NewWriter(csvx.filehandle)
-	log.Infof("CSV export created: %s", export)
 	return
 }
 
 func (csvx *CsvExport) Close() {
-	if csvx.csvwriter != nil {
-		csvx.csvwriter.Flush()
+	filehandle, err := os.Create(csvx.filename)
+	if err != nil {
+		log.Fatalf("csvx - failed to create file %s, %v", csvx.filename, err)
+		return
 	}
-	if csvx.filehandle != nil {
-		csvx.filehandle.Close()
-	}
+	defer filehandle.Close()
+
+	csvwriter := csv.NewWriter(filehandle)
+	defer csvwriter.Flush()
+
+	csvwriter.Write(csvx.headers)
+	csvwriter.WriteAll(csvx.rows)
+
 	log.Infof("CSV export ready")
 }
 func (csvx *CsvExport) Header(h ...string) {
 	csvx.headers = h
-	csvx.csvwriter.Write(h)
 }
 
 func (csvx *CsvExport) Write(p ...interface{}) {
@@ -64,5 +64,5 @@ func (csvx *CsvExport) Write(p ...interface{}) {
 	if len(ar) > len(csvx.headers) {
 		ar = ar[:len(csvx.headers)]
 	}
-	csvx.csvwriter.Write(ar)
+	csvx.rows = append(csvx.rows, ar)
 }

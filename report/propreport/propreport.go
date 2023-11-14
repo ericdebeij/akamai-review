@@ -110,13 +110,14 @@ func (br BehaviorReport) Report() {
 }
 func (or OriginReport) Report() {
 	log.Infof("pm-origins %+v", or)
+
+	properties := Build(or.Group, or.Property)
+
 	csvx, err := exportx.Create(or.Export)
 	if err != nil {
 		log.Fatalf("failed to open file %w", err)
 	}
 	defer csvx.Close()
-
-	properties := Build(or.Group, or.Property)
 
 	csvx.Header("contract", "group", "property", "origin", "origintype", "forward", "hostmatch", "pathmatch", "siteshield", "ips")
 
@@ -141,13 +142,14 @@ func (or OriginReport) Report() {
 func (hr HostReport) Report() {
 	log.Infof("pm-hosts %+v", hr)
 	srvs := services.Services
-	csvx, err := exportx.Create(hr.Export)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	defer csvx.Close()
 
 	properties := Build(hr.Group, hr.Property)
+
+	csvx, err := exportx.Create(hr.Export)
+	if err != nil {
+		log.Fatalf("error creating file", err.Error())
+	}
+	defer csvx.Close()
 
 	if hr.HttpTest {
 		csvx.Header("contract", "group", "property", "host", "edgehost", "cdn", "ips", "cert-subject", "cert-issuer", "cert-expire", "httptest")
