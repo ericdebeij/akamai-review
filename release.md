@@ -1,5 +1,8 @@
 # Release notes
 
+## 0.1.10 - remove custom resolver
+- Miekeg/dns removed, built-in resolver used to lookup CNAME and IP-addresses
+
 ## 0.1.8+9 - fix empty export
 - Irregular empty export fix
 

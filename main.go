@@ -14,5 +14,5 @@ func main() {
 	cmd.Cleanup()
 
 	// giving time to close all files correctly
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 1)
 }

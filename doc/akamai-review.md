@@ -17,7 +17,6 @@ your akamai account and perform checks on it
   -h, --help                help for akamai-review
       --logfile string      logging output
       --loglevel string     logging level
-      --resolver string     resolver to be used (default "8.8.8.8:53")
       --section string      akamai section of the credentials file (default "default")
       --warningdays int     warning days for certificate issues (default 14)
 ```

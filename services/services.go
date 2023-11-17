@@ -108,7 +108,6 @@ func init() {
 	addparam("edgerc", "akamai.edgerc", "~/.edgerc", "akamai location of the credentials file")
 	addparam("section", "akamai.section", "default", "akamai section of the credentials file")
 	addparam("accountkey", "akamai.accountkey", "", "akamai account switch key")
-	addparam("resolver", "dns.resolver", "8.8.8.8:53", "resolver to be used")
 	addparam("cache", "akamai.cache", "~/.akamai-cache", "cache folder")
 	addparam("loglevel", "log.level", "", "logging level")
 	addparam("logfile", "log.file", "", "logging output")

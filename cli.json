@@ -5,7 +5,7 @@
     "commands" : [
         {
             "name":"review",
-            "version":"v0.1.9",
+            "version":"v0.1.10",
             "description":"review akamai usage, certificates, properties",
             "bin": "https://github.com/ericdebeij/akamai-review/releases/download/{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}{{.Arch}}{{.BinSuffix}}",
             "auto-complete": true
