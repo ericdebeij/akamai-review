@@ -60,7 +60,7 @@ func StartServices() {
 	akdiag := diagnostics.NewDiagnosticsService(sess, pstr("akamai.cache"))
 	Services.AkamaiDiagnostics = akdiag
 
-	dns := dnsutil.NewDnsService(pstr("dns.resolver"))
+	dns := dnsutil.NewDnsService("")
 	Services.Dns = dns
 
 	tst := &clienttest.ClientTester{
