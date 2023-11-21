@@ -237,7 +237,7 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 						hl, _ := srvs.Properties.GetPropertyVersionHostnames(prhrq)
 
 						hll := len(hl.Hostnames.Items)
-						hostnames := make([]string, hll, hll)
+						hostnames := make([]string, hll)
 						hosts := make([]*Hostinfo, 0, 10)
 						for hii, hiv := range hl.Hostnames.Items {
 							hostnames[hii] = hiv.CnameFrom
@@ -323,9 +323,14 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 								}
 								pathmatch = strings.Trim(pathmatch, " ")
 
-								ips, _, err := srvs.Dns.DnsInfo(ohostname)
+								ips := []string{}
+								if otype == "web" {
+									if !strings.Contains(ohostname, "{") {
+										ips, _, err = srvs.Dns.DnsInfo(ohostname)
+									}
+								}
 								if err != nil {
-									log.Errorf("dns %s: %v", ohostname, err)
+									log.Debugf("dns %s: %v", ohostname, err)
 								}
 
 								origin := &OriginInfo{
