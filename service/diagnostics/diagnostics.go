@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -87,11 +88,32 @@ type ResponseVerifyIP struct {
 	} `json:"results"`
 }
 
+func ipCidr(theIp string) string {
+	// Replace this with your IPv4 address
+	ip := net.ParseIP(theIp)
+	cidrPrefixLength := 24
+	cidrBits := 32
+	if ip.To4() == nil {
+		cidrPrefixLength = 64
+		cidrBits = 128
+	}
+	// Get the network address by masking the IP with CIDR mask
+	networkAddress := ip.Mask(net.CIDRMask(cidrPrefixLength, cidrBits))
+
+	// Create an IPNet structure representing the CIDR range
+	ipNet := &net.IPNet{
+		IP:   networkAddress,
+		Mask: net.CIDRMask(cidrPrefixLength, cidrBits),
+	}
+	return ipNet.String()
+}
+
 func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, is int, err error) {
 	ismap = make(map[string]bool, len(ips))
 	allfound := true
 	for _, ip := range ips {
-		b, f := ds.IpCache[ip]
+		cidr := ipCidr(ip)
+		b, f := ds.IpCache[cidr]
 
 		if f {
 			ismap[ip] = b
@@ -116,6 +138,7 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 
 	rsb := ResponseVerifyIP{}
 
+	attempt := 0
 	for {
 		body, e := json.Marshal(rqb)
 		if e != nil {
@@ -134,8 +157,9 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 
 		if ds.Response.StatusCode == 200 {
 			for _, rip := range rsb.Results {
-				ds.IpCache[rip.IPAddress] = rip.IsEdgeIP
-				ismap[rip.IPAddress] = rip.IsEdgeIP
+				cidr := ipCidr(rip.IPAddress)
+				ds.IpCache[cidr] = rip.IsEdgeIP
+				ismap[cidr] = rip.IsEdgeIP
 				if rip.IsEdgeIP {
 					is = is + 1
 				}
@@ -149,14 +173,17 @@ func (ds *DiagnosticsService) IsAkamaiIp(ips []string) (ismap map[string]bool, i
 		if ds.Response.StatusCode != 429 {
 			data, e := io.ReadAll(ds.Response.Body)
 			if e != nil {
-				log.Errorf("isakamaiip, status %v, data error %v", ds.Response.StatusCode, e)
+				log.Debugf("isakamaiip, status %v, data error %v", ds.Response.StatusCode, e)
 			}
-			log.Errorf("isakamaiip, status %v, data %v", ds.Response.StatusCode, string(data))
+			log.Debugf("isakamaiip, status %v, data %v", ds.Response.StatusCode, string(data))
 
 			err = fmt.Errorf("status code: %d", ds.Response.StatusCode)
-			return
+			attempt += 1
+			if attempt >= 2 {
+				return
+			}
 		}
-		log.Infof("running into rate control, wait 60 seconds")
+		log.Infof("running into rate control (%v), wait 60 seconds, (%v)", ds.Response.StatusCode, ips)
 		ds.FlushCache()
 		time.Sleep(time.Minute)
 	}
