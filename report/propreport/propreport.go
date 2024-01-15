@@ -21,12 +21,14 @@ type HostReport struct {
 	Property    string
 	WarningDays int
 	HttpTest    bool
+	Network     string
 }
 
 type OriginReport struct {
 	Export   string
 	Group    string
 	Property string
+	Network  string
 }
 
 type BehaviorReport struct {
@@ -35,6 +37,7 @@ type BehaviorReport struct {
 	Property string
 	Behavior string
 	Criteria bool
+	Network  string
 }
 
 type PropertyInfo struct {
@@ -70,7 +73,7 @@ func (br BehaviorReport) Report() {
 	}
 	defer csvx.Close()
 
-	properties := Build(br.Group, br.Property)
+	properties := Build(br.Group, br.Property, false, false, br.Network)
 
 	if br.Behavior == "" {
 		csvx.Header("group", "property", "behaviors")
@@ -111,7 +114,7 @@ func (br BehaviorReport) Report() {
 func (or OriginReport) Report() {
 	log.Infof("pm-origins %+v", or)
 
-	properties := Build(or.Group, or.Property)
+	properties := Build(or.Group, or.Property, false, true, or.Network)
 
 	csvx, err := exportx.Create(or.Export)
 	if err != nil {
@@ -143,7 +146,7 @@ func (hr HostReport) Report() {
 	log.Infof("pm-hosts %+v", hr)
 	srvs := services.Services
 
-	properties := Build(hr.Group, hr.Property)
+	properties := Build(hr.Group, hr.Property, true, false, hr.Network)
 
 	csvx, err := exportx.Create(hr.Export)
 	if err != nil {
@@ -195,8 +198,12 @@ func (hr HostReport) Report() {
 	}
 }
 
-func Build(group string, property string) (properties []*PropertyInfo) {
+func Build(group string, property string, lookupHosts, lookupOrigins bool, network string) (properties []*PropertyInfo) {
 	log.Infof("buildup property info, filter: group: %v property: %v", group, property)
+	if network != "S" {
+		network = "P"
+	}
+
 	srvs := services.Services
 	properties = make([]*PropertyInfo, 0, 1000)
 	groupResponse, err := srvs.Properties.PapiClient.GetGroups(context.Background())
@@ -220,35 +227,45 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 
 				for _, x := range pl.Properties.Items {
 					pv := 0
-					if x.ProductionVersion != nil {
+					if (network == "P" && x.ProductionVersion != nil) ||
+						(network == "S" && x.StagingVersion != nil) {
+
 						if property != "" && x.PropertyName != property {
 							continue
 						}
-						pv = *x.ProductionVersion
 
-						prhrq := papi.GetPropertyVersionHostnamesRequest{
-							PropertyID:        x.PropertyID,
-							PropertyVersion:   pv,
-							ContractID:        x.ContractID,
-							GroupID:           x.GroupID,
-							ValidateHostnames: false,
-							IncludeCertStatus: true,
+						if network == "P" {
+							pv = *x.ProductionVersion
+						} else {
+							pv = *x.StagingVersion
 						}
-						hl, _ := srvs.Properties.GetPropertyVersionHostnames(prhrq)
 
-						hll := len(hl.Hostnames.Items)
-						hostnames := make([]string, hll)
 						hosts := make([]*Hostinfo, 0, 10)
-						for hii, hiv := range hl.Hostnames.Items {
-							hostnames[hii] = hiv.CnameFrom
-
-							hostinfo := &Hostinfo{
-								Hostname:   hiv.CnameFrom,
-								Edgehost:   hiv.CnameTo,
-								Clientinfo: srvs.ClientTest.Testhost(hiv.CnameFrom),
+						if lookupHosts {
+							prhrq := papi.GetPropertyVersionHostnamesRequest{
+								PropertyID:        x.PropertyID,
+								PropertyVersion:   pv,
+								ContractID:        x.ContractID,
+								GroupID:           x.GroupID,
+								ValidateHostnames: false,
+								IncludeCertStatus: true,
 							}
+							hl, _ := srvs.Properties.GetPropertyVersionHostnames(prhrq)
 
-							hosts = append(hosts, hostinfo)
+							hll := len(hl.Hostnames.Items)
+							hostnames := make([]string, hll)
+
+							for hii, hiv := range hl.Hostnames.Items {
+								hostnames[hii] = hiv.CnameFrom
+
+								hostinfo := &Hostinfo{
+									Hostname:   hiv.CnameFrom,
+									Edgehost:   hiv.CnameTo,
+									Clientinfo: srvs.ClientTest.Testhost(hiv.CnameFrom),
+								}
+
+								hosts = append(hosts, hostinfo)
+							}
 						}
 
 						prtrq := papi.GetRuleTreeRequest{
@@ -274,9 +291,9 @@ func Build(group string, property string) (properties []*PropertyInfo) {
 						}
 
 						pmorigins, f := pb.Behaviors["origin"]
-						var origins []*OriginInfo
-						if f {
-							origins = make([]*OriginInfo, len(pmorigins))
+						origins := make([]*OriginInfo, len(pmorigins))
+
+						if f && lookupOrigins {
 							for oi, o := range pmorigins {
 
 								otype := o.Behavior.Options["originType"].(string)

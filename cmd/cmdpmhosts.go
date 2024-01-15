@@ -23,6 +23,7 @@ The related edgehost is shown and the host is checked to see if it is actually s
 			Property:    viper.GetString("pm-hosts.property"),
 			WarningDays: viper.GetInt("warningdays"),
 			HttpTest:    viper.GetBool("pm-hosts.httptest"),
+			Network:     viper.GetString("pm-bhosts.network"),
 		}
 		hr.Report()
 	},
@@ -33,5 +34,6 @@ func init() {
 	param(pmhostsCmd, "group", "pm-hosts.group", "", "filter for the group")
 	param(pmhostsCmd, "property", "pm-hosts.property", "", "filter for the property")
 	param(pmhostsCmd, "httptest", "pm-hosts.httptest", false, "run a test to check http->https redirects")
+	param(pmhostsCmd, "network", "pm-hosts.network", "P", "network: P=production, S=Staging")
 	RootCmd.AddCommand(pmhostsCmd)
 }

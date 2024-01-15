@@ -21,6 +21,7 @@ var pmbehaviorsCmd = &cobra.Command{
 			Group:    viperAlias("pm-behaviors", "group"),
 			Property: viper.GetString("pm-behaviors.property"),
 			Behavior: viper.GetString("pm-behaviors.behavior"),
+			Network:  viper.GetString("pm-behaviors.network"),
 		}
 		or.Report()
 	},
@@ -31,5 +32,6 @@ func init() {
 	param(pmbehaviorsCmd, "group", "pm-behaviors.group", "", "filter for the group")
 	param(pmbehaviorsCmd, "property", "pm-behaviors.property", "", "filter for the property")
 	param(pmbehaviorsCmd, "behavior", "pm-behaviors.behavior", "", "provide details about the specific behavior")
+	param(pmbehaviorsCmd, "network", "pm-behaviors.network", "P", "network: P=production, S=Staging")
 	RootCmd.AddCommand(pmbehaviorsCmd)
 }
