@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.1.13
+## 0.1.13 - several small enhancements
 - dnsresolver added back, using standard package
 - add --network S for staging in pm- subcommands
 - isakamaiip - stabalise diagnostics call with retry, assume all IPs in /25 are akamaize or not
