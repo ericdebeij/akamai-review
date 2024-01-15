@@ -1,0 +1,5 @@
+package cmd
+
+func Version() string {
+	return "VERSION"
+}

@@ -146,6 +146,7 @@ func initConfig() {
 	log.SetLevel(mlog.MaxLevel)
 	log.SetHandler(mlog)
 
+	log.Infof("akamai-review version %v", Version())
 	if err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	} else {
