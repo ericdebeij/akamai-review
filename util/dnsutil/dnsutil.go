@@ -1,6 +1,12 @@
 package dnsutil
 
-import "net"
+import (
+	"context"
+	"fmt"
+	"net"
+
+	"github.com/apex/log"
+)
 
 type dnsinfo struct {
 	ips    []string
@@ -8,20 +14,51 @@ type dnsinfo struct {
 	err    error
 }
 type Dns struct {
-	Resolver string
+	Address  string
+	Resolver *net.Resolver
 	cache    map[string]dnsinfo
 }
 
-func NewDnsService(resolver string) (d *Dns) {
+func NewDnsService(resolverAddress string) (d *Dns) {
 	d = &Dns{
-		Resolver: resolver,
-		cache:    make(map[string]dnsinfo, 100),
+		Address: resolverAddress,
+		cache:   make(map[string]dnsinfo, 100),
+	}
+
+	log.Infof("using resolver: %v", resolverAddress)
+	if resolverAddress == "" || resolverAddress == "default" {
+		d.Resolver = net.DefaultResolver
+	} else {
+		r := &net.Resolver{
+			PreferGo:     true,
+			StrictErrors: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				d := net.Dialer{}
+				c, e := d.DialContext(ctx, "udp", resolverAddress)
+				return c, e
+			},
+		}
+
+		d.Resolver = r
+		_, test_err := d.Resolver.LookupHost(context.Background(), "www.akamai.onzin")
+		if test_err == nil {
+			test_err = fmt.Errorf("resolver %v should provide error for www.akamaized.onzin", resolverAddress)
+		}
+		fmt.Println(test_err)
 	}
 	return
 }
+
 func (d *Dns) DnsInfo(hostname string) (ips, cnames []string, err error) {
 	var cn string
 	cnames = make([]string, 0)
+
+	ip := net.ParseIP(hostname)
+	if ip != nil {
+		ips = make([]string, 1)
+		ips[0] = hostname
+		return
+	}
 
 	testhost := hostname
 	di, dif := d.cache[testhost]
@@ -32,8 +69,7 @@ func (d *Dns) DnsInfo(hostname string) (ips, cnames []string, err error) {
 		return
 	}
 	for {
-
-		cn, err = net.LookupCNAME(testhost)
+		cn, err = d.Resolver.LookupCNAME(context.Background(), testhost)
 		if err != nil || cn == "" || cn == testhost || cn == testhost+"." {
 			break
 		}
@@ -41,7 +77,8 @@ func (d *Dns) DnsInfo(hostname string) (ips, cnames []string, err error) {
 		testhost = cn
 	}
 
-	ips, err = net.LookupHost(hostname)
+	ips, err = d.Resolver.LookupHost(context.Background(), hostname)
+
 	if dnsErr, ok := err.(*net.DNSError); ok {
 		// Check if it's a "no such host" error
 		if dnsErr.IsNotFound {
