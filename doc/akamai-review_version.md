@@ -1,21 +1,19 @@
-## akamai-review cps-sans
+## akamai-review version
 
-List SANS/certificates as defined in cps and the usage of the SANs
+Version indication
 
 ### Synopsis
 
-List of the certificates, the SAN in the certificates. Additional information is provided to check whether the CN or SAN entry is actually served via Akamai
+Version indication
 
 ```
-akamai-review cps-sans [flags]
+akamai-review version [flags]
 ```
 
 ### Options
 
 ```
-      --contract string   contract to be used
-      --export string     contract to be used (default "cps-sans.csv")
-  -h, --help              help for cps-sans
+  -h, --help   help for version
 ```
 
 ### Options inherited from parent commands

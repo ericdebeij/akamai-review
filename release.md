@@ -1,5 +1,10 @@
 # Release notes
 
+## 0.1.13
+- dnsresolver added back, using standard package
+- add --network S for staging in pm- subcommands
+- isakamaiip - stabalise diagnostics call with retry, assume all IPs in /25 are akamaize or not
+
 ## 0.1.10+11+12 - remove custom resolver
 - Miekeg/dns removed, built-in resolver used to lookup CNAME and IP-addresses, skip netstorage, cache results, log errors at debug level
 
