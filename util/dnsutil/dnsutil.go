@@ -2,7 +2,6 @@ package dnsutil
 
 import (
 	"context"
-	"fmt"
 	"net"
 
 	"github.com/apex/log"
@@ -40,11 +39,6 @@ func NewDnsService(resolverAddress string) (d *Dns) {
 		}
 
 		d.Resolver = r
-		_, test_err := d.Resolver.LookupHost(context.Background(), "www.akamai.onzin")
-		if test_err == nil {
-			test_err = fmt.Errorf("resolver %v should provide error for www.akamaized.onzin", resolverAddress)
-		}
-		fmt.Println(test_err)
 	}
 	return
 }
