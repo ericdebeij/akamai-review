@@ -3,8 +3,9 @@
 CMD=akamai-review
 MAIN=${PWD}
 BUILD=${PWD}/build
-VERSION=${1:-latest}
+VERSION=$(jq '.commands[0].version' -r <cli.json)
 echo $VERSION
+sed "s/VERSION/${VERSION}/" cmd/version.template >cmd/version.go 
 
 mkdir -p build
 rm build/*
