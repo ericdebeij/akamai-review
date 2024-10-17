@@ -14,9 +14,9 @@ The following command no longer works:
 
 What you need to do instead is download the binary for your operating system and use the command directly, for example:
 ```bash
-% curl https://github.com/ericdebeij/akamai-review/releases/download/v0.1.13/akamai-review-v0.1.13-macarm64 -o akamai-review -s -L
-% chmod 755 akamai-review
-% ./akamai-review
+curl https://github.com/ericdebeij/akamai-review/releases/download/v0.1.13/akamai-review-v0.1.13-macarm64 -o akamai-review -s -L
+chmod 755 akamai-review
+./akamai-review
 ```
 or bring the right executable, together with the cli.json to the place wher the CLI can find it.
 
