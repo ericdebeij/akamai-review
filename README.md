@@ -6,11 +6,19 @@ This is sample software, will likely remain in draft state forever and there is 
 More info see also the [blog post](https://discuss.akamai.com/t/akamai-cli-plugin-investigate-cdn-configurations-and-traffic/749) on discuss.akamai.com
 
 ## Akamai CLI Install
-```bash
-%  akamai install ericdebeij/akamai-review
-```
+**akamai install for non-standard plugins has been broken as of version 1.6.0** :-(
 
-or just download the binary for your operating system from the release folder and use directly.
+The following command no longer works:
+
+~~%  akamai install ericdebeij/akamai-review~~
+
+What you need to do instead is download the binary for your operating system and use the command directly, for example:
+```bash
+% curl https://github.com/ericdebeij/akamai-review/releases/download/v0.1.13/akamai-review-v0.1.13-macarm64 -o akamai-review -s -L
+% chmod 755 akamai-review
+% ./akamai-review
+```
+or bring the right executable, together with the cli.json to the place wher the CLI can find it.
 
 ## Requirements
 * access credentials
