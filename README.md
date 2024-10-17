@@ -14,7 +14,7 @@ The following command no longer works:
 
 What you need to do instead is download the binary for your operating system from the [release folder](https://github.com/ericdebeij/akamai-review/releases/tag/v0.1.13) and use the command directly, for example:
 ```bash
-curl https://github.com/ericdebeij/akamai-review/releases/download/v0.1.13/akamai-review-v0.1.13-macarm64 -o akamai-review -s -L
+curl -o akamai-review -s -L https://github.com/ericdebeij/akamai-review/releases/download/v0.1.13/akamai-review-v0.1.13-macarm64 -D - | egrep ^HTTP
 chmod 755 akamai-review
 ./akamai-review
 ```
